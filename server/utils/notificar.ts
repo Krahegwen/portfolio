@@ -1,32 +1,28 @@
 import type { H3Event } from 'h3'
 
 /**
- * El único sitio del proyecto que emite un aviso.
+ * El único sitio del proyecto que emite un aviso, y el único que construye una
+ * URL de Telegram.
  *
- * Sale por correo, con el binding nativo de Cloudflare Email Sending: no hay
- * clave de API que custodiar ni proveedor externo que dar de alta, y el aviso
- * llega a la bandeja de siempre en lugar de a un panel al que hay que entrar.
+ * Sale por Telegram y no por correo porque el envío de correo desde un Worker
+ * exige plan Workers Paid, y esto es una web personal. A cambio, el aviso llega
+ * al móvil al instante y no hace falta dar de alta ningún proveedor nuevo.
  *
- * En los mensajes de contacto el `replyTo` es la dirección de quien escribe, así
- * que responder es darle a "Responder" y ya está.
+ * Dos detalles copiados de `common/telegram_out.py` de TWS-Tools, que ya se
+ * ganaron su sitio en producción:
  *
- * Cambiar de transporte —Telegram, un webhook, lo que sea— es reescribir
- * `enviar()`. Ni las rutas de la API ni el formulario saben por dónde sale esto.
+ *   · **Reintento en plano ante un 400.** Telegram responde 400 cuando no sabe
+ *     interpretar el marcado, y el cuerpo lo escribe un desconocido en un
+ *     formulario público: antes que perder el aviso, se manda sin formato.
+ *   · **El token nunca se registra.** Va dentro de la URL, así que cualquier
+ *     traza que la incluya lo filtra. Todo lo que sale por consola pasa por
+ *     `redactar()`.
+ *
+ * Cambiar de transporte es reescribir `enviar()`. Ni las rutas de la API ni el
+ * formulario saben por dónde sale esto.
  */
 
 export type TipoAviso = 'contacto' | 'descarga-cv'
-
-/** Lo que Cloudflare inyecta cuando el binding `send_email` está declarado. */
-interface BindingEmail {
-  send: (mensaje: {
-    to: string
-    from: { email: string, name?: string }
-    replyTo?: string
-    subject: string
-    text: string
-    html?: string
-  }) => Promise<unknown>
-}
 
 export class SinTransporte extends Error {
   constructor(motivo: string) {
@@ -37,55 +33,92 @@ export class SinTransporte extends Error {
 
 interface Aviso {
   tipo: TipoAviso
-  asunto: string
+  titulo: string
   /** Pares etiqueta/valor que forman el cuerpo. El orden se respeta. */
   campos: Array<[string, string]>
-  /** Solo para contacto: a quién contesta el botón de responder. */
-  responderA?: string
 }
 
+/** Telegram corta en 4096; el margen deja sitio al título y las etiquetas. */
+const LIMITE = 3900
+
+/** Los tres caracteres que Telegram exige escapar en modo HTML. */
 function escapar(texto: string) {
-  return texto
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+/** Quita el token de cualquier cadena antes de que llegue a un log. */
+function redactar(texto: string) {
+  return texto.replace(/bot\d+:[\w-]+/g, 'bot<token>')
+}
+
+function recortar(texto: string, maximo: number) {
+  return texto.length <= maximo ? texto : `${texto.slice(0, maximo - 1)}…`
 }
 
 /**
- * Los bindings de Cloudflare viajan en el contexto del evento, no en
- * `process.env`: son objetos vivos por petición, no cadenas de configuración.
+ * Los secretos de Cloudflare viajan en el contexto del evento, no en
+ * `process.env`. En local sí caen a `process.env` desde el `.env`.
  */
-function bindings(event: H3Event) {
-  return (event.context as { cloudflare?: { env?: Record<string, unknown> } })
+function config(event: H3Event) {
+  const env = (event.context as { cloudflare?: { env?: Record<string, unknown> } })
     .cloudflare?.env
+
+  const leer = (clave: string) =>
+    (env?.[clave] ?? process.env[clave]) as string | undefined
+
+  return { token: leer('TELEGRAM_TOKEN'), chat: leer('TELEGRAM_CHAT_ID') }
+}
+
+async function enviar(token: string, cuerpo: Record<string, string>) {
+  const respuesta = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(cuerpo),
+  })
+
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text().catch(() => '')
+    const error = new Error(`Telegram ${respuesta.status}: ${redactar(detalle).slice(0, 300)}`)
+    return { ok: false as const, estado: respuesta.status, error }
+  }
+
+  return { ok: true as const }
 }
 
 export async function notificar(event: H3Event, aviso: Aviso) {
-  const env = bindings(event)
-  const email = env?.EMAIL as BindingEmail | undefined
-  const destino = (env?.AVISOS_DESTINO ?? process.env.AVISOS_DESTINO) as string | undefined
-  const remitente = (env?.AVISOS_REMITENTE ?? process.env.AVISOS_REMITENTE) as string | undefined
+  const { token, chat } = config(event)
 
-  if (!email) throw new SinTransporte('falta el binding EMAIL en wrangler.jsonc')
-  if (!destino) throw new SinTransporte('falta la variable AVISOS_DESTINO')
-  if (!remitente) throw new SinTransporte('falta la variable AVISOS_REMITENTE')
+  if (!token) throw new SinTransporte('falta el secreto TELEGRAM_TOKEN')
+  if (!chat) throw new SinTransporte('falta la variable TELEGRAM_CHAT_ID')
 
-  const texto = aviso.campos.map(([etiqueta, valor]) => `${etiqueta}:\n${valor}`).join('\n\n')
+  const plano = [
+    aviso.titulo,
+    '',
+    ...aviso.campos.map(([etiqueta, valor]) => `${etiqueta}: ${valor}`),
+  ].join('\n')
 
-  const html = `<div style="font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.6;color:#16181c">${
-    aviso.campos
-      .map(([etiqueta, valor]) => `<p style="margin:0 0 1em"><strong style="color:#6d747f;font-size:12px;text-transform:uppercase;letter-spacing:.08em">${
-        escapar(etiqueta)
-      }</strong><br>${escapar(valor).replace(/\n/g, '<br>')}</p>`)
-      .join('')
-  }</div>`
+  const html = [
+    `<b>${escapar(aviso.titulo)}</b>`,
+    '',
+    ...aviso.campos.map(([etiqueta, valor]) => `<b>${escapar(etiqueta)}:</b> ${escapar(valor)}`),
+  ].join('\n')
 
-  await email.send({
-    to: destino,
-    from: { email: remitente, name: 'krahegwen.com' },
-    replyTo: aviso.responderA,
-    subject: aviso.asunto,
-    text: texto,
-    html,
+  const base = { chat_id: chat, link_preview_options: JSON.stringify({ is_disabled: true }) }
+
+  const conFormato = await enviar(token, {
+    ...base,
+    text: recortar(html, LIMITE),
+    parse_mode: 'HTML',
   })
+  if (conFormato.ok) return
+
+  // 400 es "no sé leer este marcado". Cualquier otro código es un problema de
+  // verdad —token mal, chat inexistente, Telegram caído— y reintentar en plano
+  // solo lo escondería.
+  if (conFormato.estado !== 400) throw conFormato.error
+
+  console.warn('[avisos] Telegram rechazó el formato, reintento en plano:', redactar(String(conFormato.error)))
+
+  const enPlano = await enviar(token, { ...base, text: recortar(plano, LIMITE) })
+  if (!enPlano.ok) throw enPlano.error
 }

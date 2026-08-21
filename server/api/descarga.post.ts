@@ -58,11 +58,10 @@ export default defineEventHandler(async (event) => {
     try {
       await notificar(event, {
         tipo: 'descarga-cv',
-        asunto: `krahegwen.com — CV descargado (${variante}, ${idioma.toUpperCase()})`,
+        titulo: '📄 CV descargado',
         campos: [
           ['Variante', variante],
           ['Idioma', idioma === 'es' ? 'Español' : 'Inglés'],
-          ['Momento', new Date(ahora).toISOString()],
         ],
       })
     }

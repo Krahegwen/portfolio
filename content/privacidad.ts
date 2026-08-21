@@ -13,10 +13,10 @@ import type { I18nText } from './profile'
  *   · localStorage: solo la clave `kw-theme` (claro/oscuro).
  *   · Fuentes autoalojadas: no hay petición a Google.
  *   · Cloudflare Web Analytics: sin cookies ni identificador persistente.
- *   · Formulario: nombre, correo y mensaje, con consentimiento expreso. Sale por
- *     correo directamente a Diego; no hay base de datos ni tercero de por medio.
- *   · Descarga de CV: variante, idioma y hora. Nunca quién.
- *   · Un solo proveedor en total: Cloudflare.
+ *   · Formulario: nombre, correo y mensaje, con consentimiento expreso. El aviso
+ *     sale por Telegram, que por tanto ve el mensaje. Hay que decirlo.
+ *   · Descarga de CV: variante e idioma. Nunca quién.
+ *   · Dos proveedores: Cloudflare y Telegram.
  */
 
 export interface Bloque {
@@ -67,8 +67,8 @@ export const bloques: Bloque[] = [
         en: 'I use Cloudflare Web Analytics to know which pages get read. It sets no cookies and creates no identifier that follows you between visits: the data is aggregated and cannot be used to reconstruct one person’s path.',
       },
       {
-        es: 'Además registro dos acciones concretas, y solo como recuento: cuántas veces se descarga cada versión del CV y en qué idioma, y cuántos mensajes llegan por el formulario. De la descarga se guarda la variante, el idioma y la hora. No se guarda quién.',
-        en: 'I also record two specific actions, purely as counts: how many times each version of the CV is downloaded and in which language, and how many messages arrive through the form. For a download, what is stored is the variant, the language and the time. Not who.',
+        es: 'Aparte, cuando alguien se descarga un CV me llega un aviso con la versión y el idioma. Nada más: ni quién, ni desde dónde, ni con qué navegador. Saber que hoy se han bajado tres CV en inglés me sirve; saber quién lo hizo, no.',
+        en: 'Separately, when someone downloads a CV I get a notification with the version and the language. Nothing else: not who, not from where, not with which browser. Knowing that three English CVs were downloaded today is useful to me; knowing who downloaded them is not.',
       },
       {
         es: 'Base legal: interés legítimo en saber si lo que publico se lee y funciona, con un tratamiento que no permite identificarte.',
@@ -85,8 +85,8 @@ export const bloques: Bloque[] = [
         en: 'This is where personal data does appear, and it is what you type: your name, your email and your message. I collect it for one purpose, replying to you, which is why the consent box is mandatory and not pre-ticked.',
       },
       {
-        es: 'Lo que escribes me llega por correo y nada más: no hay base de datos de formularios, ni panel donde queden almacenados, ni ningún tercero por el que pasen. Vive en mi bandeja de entrada, como si me hubieras escrito directamente — que es exactamente lo que hace el formulario, ahorrándote copiar la dirección.',
-        en: 'What you write reaches me by email and nothing else: there is no form database, no dashboard where submissions pile up, and no third party in between. It lives in my inbox, as if you had written to me directly — which is exactly what the form does, saving you from copying the address.',
+        es: 'Un detalle que conviene que sepas, porque no es lo que uno se imagina: el aviso de que has escrito me llega **por Telegram**, así que tu mensaje pasa por sus servidores además de llegarme a mí. No hay base de datos de formularios ni panel donde queden almacenados — lo que hay es ese aviso, en un chat mío. Si prefieres que tu mensaje no pase por ahí, escríbeme directamente al correo del pie.',
+        en: 'One detail worth knowing, because it is not what you would assume: the alert telling me you have written arrives **over Telegram**, so your message passes through their servers as well as reaching me. There is no form database and no dashboard where submissions pile up — there is that alert, in a chat of mine. If you would rather your message did not go through there, write to the address in the footer instead.',
       },
       {
         es: 'Para frenar el spam automatizado, el servidor cuenta cuántos envíos llegan desde una misma conexión en los últimos diez minutos. Para eso no guarda tu IP, sino una huella criptográfica suya que vive en memoria y se descarta al cerrarse esa ventana.',
@@ -103,14 +103,18 @@ export const bloques: Bloque[] = [
     titulo: { es: 'Quién más toca esto', en: 'Who else is involved' },
     parrafos: [
       {
-        es: 'Uno solo:',
-        en: 'Just one:',
+        es: 'Dos, y ninguno más:',
+        en: 'Two, and no others:',
       },
     ],
     lista: [
       {
-        es: '**Cloudflare** — aloja la web, presta la analítica y entrega el correo del formulario. Como cualquier servidor, registra las peticiones que recibe para poder operar y defenderse de abusos.',
-        en: '**Cloudflare** — hosts the site, provides the analytics, and delivers the contact-form email. Like any server, it logs the requests it receives in order to operate and to defend against abuse.',
+        es: '**Cloudflare** — aloja la web y presta la analítica. Como cualquier servidor, registra las peticiones que recibe para poder operar y defenderse de abusos.',
+        en: '**Cloudflare** — hosts the site and provides the analytics. Like any server, it logs the requests it receives in order to operate and to defend against abuse.',
+      },
+      {
+        es: '**Telegram** — transporta los avisos, así que ve el contenido del formulario. Solo interviene si escribes; si únicamente lees la web, Telegram no se entera de que existes.',
+        en: '**Telegram** — carries the notifications, so it sees the contents of the form. It only comes into play if you write; if you simply read the site, Telegram never learns you exist.',
       },
       {
         es: 'Las tipografías están alojadas en este mismo dominio a propósito. Cargarlas desde Google Fonts, que es lo normal, habría enviado tu IP a Google en cada visita; se descargaron una vez y se sirven desde aquí.',

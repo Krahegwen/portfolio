@@ -21,35 +21,48 @@ Si prefieres que despliegue solo en cada push, Cloudflare tiene **Workers Builds
 Dashboard → Workers → el proyecto → Settings → Builds → conectar
 `Krahegwen/portfolio`. Comando de build `pnpm build`, de deploy `npx wrangler deploy`.
 
-## 2. Correo del formulario
+## 2. Avisos por Telegram
 
-Es lo único que no funciona hasta que lo habilites. Mientras tanto el formulario
-devuelve un 503 honesto y enseña tu dirección para escribir directamente, en
-lugar de tragarse el mensaje diciendo que ha llegado.
+Es lo único que no funciona hasta que lo configures. Mientras tanto el formulario
+devuelve un 503 honesto y enseña tu dirección de correo, en lugar de tragarse el
+mensaje diciendo que ha llegado.
+
+> **Por qué Telegram y no correo.** Enviar correo desde un Worker exige plan
+> Workers Paid (5 $/mes) — lo dice el propio dashboard en Email Sending. Para una
+> web personal no compensa, y tú ya tienes bots de Telegram en producción.
+
+1. Habla con [@BotFather](https://t.me/BotFather) → `/newbot`. Te da el token.
+2. **Escríbele algo a tu bot nuevo.** Sin eso Telegram no le deja iniciar la
+   conversación y el aviso nunca llegará.
+3. Saca el id del chat:
 
 ```bash
-npx wrangler email sending enable krahegwen.com
+curl -s "https://api.telegram.org/bot<TU_TOKEN>/getUpdates" | grep -o '"chat":{"id":[-0-9]*'
 ```
 
-Si da `Unauthorized [code: 2036]` —le pasó a mi token— es que le faltan permisos
-de Email. Dos salidas:
+4. El id no es secreto: va en `vars` de `wrangler.jsonc`, en `TELEGRAM_CHAT_ID`.
+   El token **sí** lo es:
 
-- **Dashboard**: Email → Email Sending → añadir `krahegwen.com` y seguir el
-  asistente. Crea los registros SPF/DKIM/DMARC solo, porque el DNS ya está ahí.
-- **Token nuevo** con el permiso `Email Sending: Edit` y repetir el comando.
+```bash
+npx wrangler secret put TELEGRAM_TOKEN
+```
 
-El remitente configurado es `web@krahegwen.com` (en `vars` de `wrangler.jsonc`).
-No hace falta que ese buzón exista para *enviar*; si además quieres recibir en
-él, eso es **Email Routing**, que es otra pestaña y otro día.
+5. `pnpm deploy` y prueba el formulario en la web.
 
-Compruébalo con el formulario de la web una vez desplegada. Debería llegarte un
-correo de `krahegwen.com` con **Responder-a** apuntando a quien escribió, así que
-contestar es darle a Responder.
+### Detalles que ya están resueltos
+
+- **Reintento en plano.** El mensaje lo escribe un desconocido en un formulario
+  público; si Telegram no sabe interpretar el marcado devuelve un 400 y el aviso
+  se reenvía sin formato en lugar de perderse. Mismo criterio que
+  `common/telegram_out.py` en TWS-Tools.
+- **El token nunca se registra.** Va dentro de la URL, así que cualquier traza
+  que la incluya lo filtraría: todo lo que sale por consola pasa por `redactar()`,
+  y hay un test que lo comprueba.
 
 ### Silenciar los avisos de descarga
 
-Cada descarga de CV manda un correo, con media hora de silencio por variante para
-que curiosear las seis versiones no genere seis correos. Si aun así sobra:
+Cada descarga de CV manda un aviso, con media hora de silencio por variante para
+que curiosear las seis versiones no genere seis mensajes. Si aun así sobra:
 `AVISAR_DESCARGAS` a `no` en `wrangler.jsonc` y redesplegar.
 
 ## 3. El dominio
@@ -86,6 +99,9 @@ documento **antes** de desplegar.
 - **El teléfono**: hoy no sale en ningún PDF, a propósito. Si lo quieres en el
   público, `identity.publishPhone: true` en `content/profile.ts` y
   `pnpm build && pnpm cv:pdf`.
+- **Si algún día pasas a Workers Paid** y prefieres correo, el cambio es
+  reescribir `enviar()` en `server/utils/notificar.ts` y actualizar el bloque de
+  terceros de `content/privacidad.ts`. Nada más sabe por dónde salen los avisos.
 
 ### Si empieza a entrar spam
 

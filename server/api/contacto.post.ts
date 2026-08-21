@@ -118,15 +118,14 @@ export default defineEventHandler(async (event) => {
   try {
     await notificar(event, {
       tipo: 'contacto',
-      asunto: `krahegwen.com — ${nombre}`,
-      // El `replyTo` es la gracia de mandarlo por correo: responder es darle a
-      // "Responder", sin copiar direcciones a mano desde un panel.
-      responderA: email,
+      titulo: '✉️ Contacto desde krahegwen.com',
       campos: [
-        ['De', `${nombre} <${email}>`],
+        ['De', nombre],
+        // El correo va en su propio campo y no pegado al nombre: en el móvil se
+        // toca para copiarlo, que es lo primero que hace falta para responder.
+        ['Correo', email],
         ['Idioma', idioma === 'es' ? 'Español' : 'Inglés'],
         ['Mensaje', mensaje],
-        ['Recibido', new Date(ahora).toISOString()],
       ],
     })
   }

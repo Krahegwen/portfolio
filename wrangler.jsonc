@@ -34,18 +34,15 @@
   },
 
   /*
-   * Envío de correo nativo: sin clave de API que custodiar. El dominio del
-   * remitente tiene que estar dado de alta antes del primer envío —ver
-   * DESPLIEGUE.md—; hasta entonces el formulario devuelve 503 y enseña la
-   * dirección para escribir directamente, en lugar de tragarse el mensaje.
+   * Los avisos salen por Telegram. El envío de correo desde un Worker exige
+   * plan Workers Paid, y esto es una web personal.
+   *
+   * `TELEGRAM_TOKEN` **no está aquí**: es un secreto y va por
+   * `wrangler secret put TELEGRAM_TOKEN`. Este fichero se versiona.
    */
-  "send_email": [
-    { "name": "EMAIL" }
-  ],
-
   "vars": {
-    "AVISOS_DESTINO": "diego.portilla@protonmail.com",
-    "AVISOS_REMITENTE": "web@krahegwen.com",
+    // El id del chat no es un secreto: sin el token no sirve de nada.
+    "TELEGRAM_CHAT_ID": "",
     // `no` silencia los avisos de descarga sin tocar código ni redesplegar.
     "AVISAR_DESCARGAS": "si"
   },

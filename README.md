@@ -93,17 +93,22 @@ poner un muro delante de cada persona que quiere escribir. Tres filtros baratos
 —campo trampa, tiempo mínimo de relleno y límite por IP— paran el spam
 automatizado. Si dejan de bastar, el siguiente paso está en DESPLIEGUE.md.
 
-Los avisos salen **por correo**, con el binding `send_email` de Cloudflare: sin
-clave de API que custodiar y sin proveedor externo por el que pasen los mensajes.
-El `replyTo` es la dirección de quien escribe, así que responder es darle a
-"Responder". Si el correo no sale, el endpoint devuelve 503 y el formulario
-enseña la dirección para escribir directamente — prometer que ha llegado un
-mensaje que se ha perdido es peor que dar el error.
+Los avisos salen **por Telegram**, no por correo: enviar correo desde un Worker
+exige plan Workers Paid y esto es una web personal. Si el aviso no sale, el
+endpoint devuelve 503 y el formulario enseña la dirección de correo para escribir
+directamente — prometer que ha llegado un mensaje que se ha perdido es peor que
+dar el error.
 
-Todo el transporte pasa por `server/utils/notificar.ts`: cambiarlo por Telegram,
-un webhook o lo que sea es reescribir una función.
+Dos decisiones vienen prestadas de `common/telegram_out.py` de TWS-Tools, que ya
+se ganaron su sitio en producción: **reintento en plano ante un 400**, porque el
+cuerpo lo escribe un desconocido y perder el aviso por un carácter raro sería
+absurdo; y **el token nunca se registra**, porque viaja dentro de la URL y
+cualquier traza que la incluya lo filtraría.
 
-De las descargas de CV se registra **qué variante, en qué idioma y cuándo**.
+Todo el transporte pasa por `server/utils/notificar.ts`: cambiarlo por correo, un
+webhook o lo que sea es reescribir una función.
+
+De las descargas de CV se registra **qué variante y en qué idioma**.
 Nunca quién: ni IP, ni user-agent, ni cabecera de procedencia. El aviso lo
 dispara la página porque el PDF es un fichero estático que Cloudflare sirve sin
 pasar por el Worker; la consecuencia es que el recuento es una aproximación, y
@@ -121,10 +126,11 @@ Las tipografías **están autoalojadas** (`public/fonts/`, 392 KB). Cargarlas de
 Google Fonts, que es lo normal, habría enviado la IP de cada visitante a Google
 en cada carga; ahora también ahorra dos handshakes en la ruta crítica.
 
-Cloudflare Web Analytics tampoco pone cookies ni identificador persistente. Y no
-hay más proveedores: el sitio, la analítica y el correo del formulario salen
-todos de Cloudflare, así que la lista de terceros de la política tiene una sola
-entrada.
+Cloudflare Web Analytics tampoco pone cookies ni identificador persistente. Los
+terceros son exactamente dos y la política los nombra: **Cloudflare**, que aloja
+y mide, y **Telegram**, que transporta los avisos y por tanto ve el contenido del
+formulario. Telegram solo interviene si escribes; quien únicamente lee la web no
+llega a existir para él.
 
 `content/privacidad.ts` es el texto que se publica, y **`tests/privacidad.spec.ts`
 ata cada afirmación a una comprobación sobre el código**: si alguien añade una
@@ -178,7 +184,7 @@ Viven en local y **no están en el repo** (`tests/` y `vitest.config.ts` están 
 `devDependencies` sí están versionadas, así que `pnpm test` funcionará sin tocar
 nada más.
 
-Son 65 y cubren cuatro cosas: la aritmética de fechas, la coherencia del
+Son 68 y cubren cuatro cosas: la aritmética de fechas, la coherencia del
 contenido (fechas sin huecos ni solapes, slugs únicos, traducciones sin
 olvidos), la paridad de los dos árboles de rutas, y las dos que de verdad
 importan — que los nombres de cliente no se escapen de la variante interna, y
