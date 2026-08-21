@@ -1,0 +1,149 @@
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--ink-900);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  font-weight: 350;
+  line-height: 1.65;
+  min-height: 100svh;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
+}
+
+/* El grano lo pone el body, no un div: así nunca intercepta un clic. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+img,
+svg,
+canvas,
+video { display: block; max-width: 100%; }
+
+/* El `display` de la hoja de usuario para [hidden] lo pisa cualquier regla de
+   autor con `display`. Sin esto, un `.drawer { display: flex }` dentro de una
+   media query deja el menú móvil abierto de par en par al cargar. */
+[hidden] { display: none !important; }
+
+img { height: auto; }
+
+input,
+button,
+textarea,
+select { font: inherit; color: inherit; }
+
+button { background: none; border: 0; cursor: pointer; }
+
+a {
+  color: inherit;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 0.25em;
+  transition: color 0.25s var(--ease-out), text-decoration-color 0.25s var(--ease-out);
+}
+
+a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+h1, h2, h3, h4 {
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ---------- utilidades ---------- */
+
+.shell {
+  width: min(100% - var(--gutter) * 2, var(--shell));
+  margin-inline: auto;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.02em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.section {
+  position: relative;
+  padding-block: clamp(4.5rem, 3rem + 7vw, 9rem);
+}
+
+.rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--line-strong) 12%, var(--line-strong) 88%, transparent);
+}
+
+/* ---------- movimiento reducido ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- impresión: la usa la generación de PDF ---------- */
+
+@media print {
+  body::before { display: none; }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

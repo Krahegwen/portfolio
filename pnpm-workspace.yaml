@@ -1,0 +1,6 @@
+# Solo estos dos paquetes pueden ejecutar scripts de instalación:
+# esbuild y unrs-resolver traen binarios que se compilan/descargan en postinstall
+# y sin ellos vitest y el linter no arrancan.
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true

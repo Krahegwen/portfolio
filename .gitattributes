@@ -1,0 +1,7 @@
+# Un único final de línea en el repo, sea cual sea la máquina que commitea.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.woff2 binary

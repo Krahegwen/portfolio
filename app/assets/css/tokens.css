@@ -1,0 +1,89 @@
+/*
+ * Tokens de diseño.
+ *
+ * Paleta de instrumento de precisión: tinta casi negra, tipografía cálida y un
+ * único acento ámbar que hace de señal. El claro no es el oscuro invertido:
+ * es papel, con su propio contraste.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Fondo, de más hondo a más cerca */
+  --ink-900: #08090b;
+  --ink-800: #0c0e11;
+  --ink-700: #111418;
+  --ink-600: #171b20;
+  --ink-500: #1f242b;
+
+  /* Texto */
+  --fg: #ece9e3;
+  --fg-dim: #a8aeb8;
+  --fg-faint: #6d747f;
+
+  /* Línea y superficie */
+  --line: rgb(255 255 255 / 9%);
+  --line-strong: rgb(255 255 255 / 16%);
+  --surface: rgb(255 255 255 / 3%);
+  --surface-2: rgb(255 255 255 / 5.5%);
+
+  /* Señal */
+  --accent: #ff7a2f;
+  --accent-soft: #ffa46a;
+  --accent-ink: #1a0d04;
+  --accent-glow: rgb(255 122 47 / 22%);
+  --cyan: #57c9e8;
+
+  /* Tipografía */
+  --font-sans: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, sfmono-regular, 'Cascadia Code', monospace;
+
+  /* Escala fluida: de móvil a 1440 sin saltos */
+  --step--1: clamp(0.79rem, 0.77rem + 0.11vw, 0.85rem);
+  --step-0: clamp(0.95rem, 0.91rem + 0.2vw, 1.06rem);
+  --step-1: clamp(1.14rem, 1.07rem + 0.35vw, 1.35rem);
+  --step-2: clamp(1.37rem, 1.25rem + 0.58vw, 1.72rem);
+  --step-3: clamp(1.64rem, 1.46rem + 0.9vw, 2.2rem);
+  --step-4: clamp(1.97rem, 1.69rem + 1.4vw, 2.8rem);
+  --step-5: clamp(2.36rem, 1.94rem + 2.1vw, 3.57rem);
+  --step-6: clamp(2.84rem, 2.2rem + 3.15vw, 4.55rem);
+  --step-7: clamp(3.4rem, 2.46rem + 4.7vw, 5.8rem);
+
+  /* Ritmo */
+  --gutter: clamp(1.25rem, 0.9rem + 1.7vw, 2.5rem);
+  --measure: 62ch;
+  --shell: 1240px;
+  --radius: 14px;
+  --radius-sm: 8px;
+
+  /* Movimiento */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur: 0.6s;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --ink-900: #f6f3ee;
+  --ink-800: #f1ede6;
+  --ink-700: #eae5dc;
+  --ink-600: #e2dcd1;
+  --ink-500: #d8d1c4;
+
+  --fg: #16181c;
+  --fg-dim: #4d535d;
+  --fg-faint: #7c828c;
+
+  --line: rgb(20 22 26 / 12%);
+  --line-strong: rgb(20 22 26 / 22%);
+  --surface: rgb(20 22 26 / 3%);
+  --surface-2: rgb(20 22 26 / 5.5%);
+
+  --accent: #d2500a;
+  --accent-soft: #a83f06;
+  --accent-ink: #fff6ef;
+  --accent-glow: rgb(210 80 10 / 15%);
+  --cyan: #16697f;
+}

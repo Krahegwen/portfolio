@@ -1,0 +1,154 @@
+<!doctype html>
+<!--
+  Tarjeta social, 1200×630. Se renderiza con Chrome headless a public/og.png
+  (`node scripts/build-og.mjs`). La textura de fondo la generó ComfyUI en local
+  con z-image-turbo; el texto va encima, vectorial, para que se lea nítido en el
+  timeline de LinkedIn en lugar de salir de un modelo que no sabe escribir.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; box-sizing: border-box; }
+
+  body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    position: relative;
+    background: #08090b;
+    color: #ece9e3;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .bg {
+    position: absolute;
+    inset: 0;
+    background: url('./og-texture.png') center / cover no-repeat;
+    /* La textura se apaga por la izquierda, que es donde vive el texto. */
+    mask-image: linear-gradient(95deg, transparent 4%, rgba(0,0,0,.35) 38%, #000 72%);
+  }
+
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(85% 110% at 8% 42%, rgba(8,9,11,.96) 34%, rgba(8,9,11,0) 74%);
+  }
+
+  .grain {
+    position: absolute;
+    inset: 0;
+    opacity: .05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .inner {
+    position: relative;
+    height: 100%;
+    padding: 68px 72px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mark {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: -.02em;
+  }
+
+  .glyph {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #ff7a2f;
+  }
+
+  .name {
+    margin-top: auto;
+    font-family: 'Instrument Serif', serif;
+    font-size: 96px;
+    line-height: .95;
+    letter-spacing: -.028em;
+    max-width: 12ch;
+  }
+
+  .role {
+    margin-top: 22px;
+    font-size: 27px;
+    font-weight: 400;
+    color: #ff7a2f;
+  }
+
+  .lede {
+    margin-top: 12px;
+    font-size: 23px;
+    font-weight: 300;
+    line-height: 1.35;
+    color: #a8aeb8;
+    max-width: 26ch;
+  }
+
+  .facts {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    padding-top: 26px;
+    border-top: 1px solid rgba(255,255,255,.12);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    letter-spacing: .04em;
+    color: #6d747f;
+    text-transform: uppercase;
+  }
+
+  .facts b {
+    font-family: 'Instrument Serif', serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #ece9e3;
+    margin-right: 8px;
+    text-transform: none;
+  }
+
+  .url {
+    position: absolute;
+    right: 72px;
+    top: 72px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    letter-spacing: .12em;
+    color: #6d747f;
+  }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+
+  <div class="inner">
+    <div class="mark">
+      <span class="glyph">DP</span>
+      <span>Krahegwen</span>
+    </div>
+    <span class="url">krahegwen.com</span>
+
+    <h1 class="name">Diego Portilla Tejería</h1>
+    <p class="role" data-slot="role">Desarrollador Front-End Senior</p>
+    <p class="lede" data-slot="lede">Interfaces que aguantan producción y experiencias 3D en el navegador.</p>
+
+    <div class="facts" data-slot="facts"></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# Nuxt
+.nuxt
+.output
+.data
+.nitro
+.cache
+.vercel
+dist
+
+# Dependencias
+node_modules
+*.log*
+
+# Entorno
+.env
+.env.*
+!.env.example
+
+# Editor / SO
+.DS_Store
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Tests: por ahora se quedan en local (Diego, 2026-08-21).
+# Para publicarlos basta con borrar estas tres líneas — vitest.config.ts y las
+# devDependencies ya están en el repo, así que el `pnpm test` funcionará solo.
+tests/
+vitest.config.ts
+
+# Los CV de origen (2022-2023) y las copias de trabajo de CV/2026/ no van al
+# repo. Los PDF que sirve la web sí, desde public/cv/.
+#
+# La barra inicial no es decorativa: con `core.ignoreCase=true` (Windows por
+# defecto), un `CV/` suelto también ignora `public/cv/` y los PDF publicados se
+# quedaban fuera del commit sin que nada avisara.
+/CV/

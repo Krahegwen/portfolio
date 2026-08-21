@@ -1,0 +1,3 @@
+<template>
+  <PagesProjectsPage />
+</template>
