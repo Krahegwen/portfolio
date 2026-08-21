@@ -8,10 +8,44 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+  /*
+   * Las mismas caras que sirve la web, desde disco. Antes se pedían a Google en
+   * cada render: funcionaba, pero ataba la generación de la tarjeta a tener red
+   * y dejaba una dependencia externa en un paso que puede correr sin ella.
+   */
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../public/fonts/instrument-serif-400-latin.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 500;
+    src: url('../public/fonts/jetbrains-mono-500-latin.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal;
+    font-weight: 300;
+    src: url('../public/fonts/space-grotesk-300-latin.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../public/fonts/space-grotesk-400-latin.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal;
+    font-weight: 500;
+    src: url('../public/fonts/space-grotesk-500-latin.woff2') format('woff2');
+  }
+
+
   * { margin: 0; box-sizing: border-box; }
 
   body {

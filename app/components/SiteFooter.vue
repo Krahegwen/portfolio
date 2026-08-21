@@ -15,14 +15,16 @@ const year = new Date().getFullYear()
 
       <nav class="ftr__links" :aria-label="locale === 'es' ? 'Enlaces' : 'Links'">
         <a :href="`mailto:${identity.email}`">{{ identity.email }}</a>
+        <a :href="identity.linkedin" rel="me noopener" target="_blank">LinkedIn</a>
         <a :href="identity.github" rel="me noopener" target="_blank">GitHub · {{ identity.handle }}</a>
         <NuxtLink :to="localePath('/cv')">{{ t({ es: 'CV completo', en: 'Full CV' }) }}</NuxtLink>
+        <NuxtLink :to="localePath('/privacidad')">{{ t({ es: 'Privacidad', en: 'Privacy' }) }}</NuxtLink>
       </nav>
     </div>
 
     <div class="shell ftr__base mono">
       <span>© {{ year }} {{ identity.name }}</span>
-      <span>{{ t({ es: 'Nuxt 4 · GSAP · prerenderizado en Vercel', en: 'Nuxt 4 · GSAP · prerendered on Vercel' }) }}</span>
+      <span>{{ t({ es: 'Nuxt 4 · GSAP · Vercel · sin cookies', en: 'Nuxt 4 · GSAP · Vercel · no cookies' }) }}</span>
     </div>
   </footer>
 </template>

@@ -2,7 +2,8 @@
 import type { CvVariant } from '~~/content/profile'
 import { identity } from '~~/content/profile'
 
-const { locale, t } = useLocale()
+const { locale, t, localePath } = useLocale()
+const { evento } = useAnalytics()
 const route = useRoute()
 const router = useRouter()
 
@@ -58,6 +59,29 @@ const activeMeta = computed(() => variants.value.find(v => v.id === active.value
 
 function select(id: CvVariant) {
   router.replace({ query: id === 'recruiter' ? {} : { v: id } })
+  evento('cv_variante_vista', { variante: id, idioma: locale.value })
+}
+
+/**
+ * El PDF es un fichero estático que sirve Vercel sin pasar por el servidor, así
+ * que el aviso lo manda la página. `keepalive` es lo que hace que la petición
+ * sobreviva a la navegación que dispara la descarga; sin él el navegador la
+ * cancela a mitad y el aviso se pierde.
+ *
+ * No se hace `preventDefault`: si esto falla, la descarga ocurre igual. Contar
+ * es secundario; entregar el PDF, no.
+ */
+function alDescargar() {
+  evento('cv_descargado', { variante: active.value, idioma: locale.value })
+  try {
+    void fetch('/api/descarga', {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ variante: active.value, idioma: locale.value }),
+    }).catch(() => {})
+  }
+  catch { /* la descarga sigue su curso */ }
 }
 
 const title = computed(() => `CV — ${identity.name}`)
@@ -105,7 +129,12 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
           <p class="cvp__blurb">
             {{ activeMeta.blurb }}
           </p>
-          <a class="cvp__dl" :href="`/cv/${activeMeta.file}`" :download="activeMeta.file">
+          <a
+            class="cvp__dl"
+            :href="`/cv/${activeMeta.file}`"
+            :download="activeMeta.file"
+            @click="alDescargar"
+          >
             <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 2.5v8M4.5 7.5 8 11l3.5-3.5M2.5 13.5h11" />
             </svg>
@@ -128,6 +157,9 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
             es: 'Ni la web ni los PDF llevan teléfono: un número en una página abierta lo recogen los rastreadores en días y no hay forma de retirarlo. Para un canal directo, el correo. Los nombres de cliente solo aparecen en la versión interna.',
             en: 'Neither the site nor the PDFs carry a phone number: one printed on an open page is scraped within days and cannot be taken back. For a direct line, the email. Client names only appear in the internal version.',
           }) }}
+          <NuxtLink :to="localePath('/privacidad')">
+            {{ t({ es: 'De las descargas solo cuento cuántas y de cuál.', en: 'Of downloads I count only how many, and of which.' }) }}
+          </NuxtLink>
         </p>
       </div>
     </section>

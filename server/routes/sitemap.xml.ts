@@ -21,6 +21,7 @@ const entries: Entry[] = [
   { es: '/', en: '/en', priority: '1.0' },
   { es: '/cv', en: '/en/cv', priority: '0.9' },
   { es: '/proyectos', en: '/en/projects', priority: '0.8' },
+  { es: '/privacidad', en: '/en/privacy', priority: '0.3' },
   ...projects.map(project => ({
     es: `/proyectos/${project.slug}`,
     en: `/en/projects/${project.slug}`,

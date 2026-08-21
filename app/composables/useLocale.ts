@@ -18,10 +18,14 @@ export function useLocale() {
     return typeof value === 'string' ? value : value[locale.value]
   }
 
-  /** Prefija una ruta con el idioma actual. `localePath('/cv')` → `/en/cv`. */
+  /**
+   * Prefija una ruta con el idioma actual y traduce el segmento si lo tiene.
+   * `localePath('/cv')` → `/en/cv`; `localePath('/privacidad')` → `/en/privacy`.
+   */
   function localePath(path: string): string {
     if (locale.value === 'es') return path
-    return path === '/' ? '/en' : `/en${path}`
+    const traducida = translateSlugs(path, 'en')
+    return traducida === '/' ? '/en' : `/en${traducida}`
   }
 
   /** La misma página en el otro idioma, para el conmutador y el `hreflang`. */
@@ -38,18 +42,27 @@ export function useLocale() {
   return { locale, t, localePath, alternatePath }
 }
 
-/** Los dos segmentos que difieren entre árboles. El resto de la ruta es idéntico. */
-const SLUGS: Record<Locale, { projects: string }> = {
-  es: { projects: 'proyectos' },
-  en: { projects: 'projects' },
+/**
+ * Los segmentos que difieren entre árboles. El resto de la ruta es idéntico, así
+ * que el conmutador de idioma solo tiene que traducir el primero.
+ *
+ * Si algún día se añade una página con slug propio y no se apunta aquí, el
+ * conmutador llevará a un 404 en el otro idioma. Hay un test que lo comprueba.
+ */
+const SLUGS: Record<Locale, Record<string, string>> = {
+  es: { projects: 'proyectos', privacy: 'privacidad' },
+  en: { projects: 'projects', privacy: 'privacy' },
 }
 
 function translateSlugs(path: string, to: Locale): string {
   const from: Locale = to === 'es' ? 'en' : 'es'
-  return path.replace(
-    new RegExp(`^/${SLUGS[from].projects}(/|$)`),
-    `/${SLUGS[to].projects}$1`,
-  )
+  for (const clave of Object.keys(SLUGS.es)) {
+    const origen = SLUGS[from][clave]!
+    const destino = SLUGS[to][clave]!
+    const patron = new RegExp(`^/${origen}(/|$)`)
+    if (patron.test(path)) return path.replace(patron, `/${destino}$1`)
+  }
+  return path
 }
 
 /** La base de rutas de proyectos en el idioma activo. */

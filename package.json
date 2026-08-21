@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@11.20.0",
   "engines": {
-    "node": ">=22.12"
+    "node": ">=24"
   },
   "scripts": {
     "dev": "nuxt dev",
@@ -20,6 +20,9 @@
     "og": "node scripts/build-og.mjs"
   },
   "dependencies": {
+    "@sentry/nuxt": "^10.70.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "gsap": "^3.13.0",
     "nuxt": "^4.2.1",
     "vue": "^3.5.22",

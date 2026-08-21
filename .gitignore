@@ -31,6 +31,9 @@ node_modules
 tests/
 vitest.config.ts
 
+# Los ficheros que genera el módulo de Sentry en el build.
+.sentry-build-plugin
+
 # Los CV de origen (2022-2023) y las copias de trabajo de CV/2026/ no van al
 # repo. Los PDF que sirve la web sí, desde public/cv/.
 #

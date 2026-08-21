@@ -54,6 +54,7 @@ export const identity = {
   location: { es: 'Cantabria, España', en: 'Cantabria, Spain' } as I18nText,
   email: 'diego.portilla@protonmail.com',
   emailInternal: 'diego.portilla@accenture.com',
+  linkedin: 'https://www.linkedin.com/in/diego-portilla-tejer%C3%ADa-68092b127',
   phone: '+34 636 301 977',
   /**
    * Si el teléfono sale en el PDF público. **Por defecto no**, y a conciencia:
@@ -72,6 +73,8 @@ export const identity = {
   careerStart: '2017-06',
   vueStart: '2018-04',
   xrStart: '2021-09',
+  /** Teletrabajo continuado, sin volver a presencial por el camino. */
+  remoteSince: '2018-01',
 }
 
 export const tagline: I18nText = {
@@ -81,16 +84,16 @@ export const tagline: I18nText = {
 
 export const summary: Record<CvVariant, I18nText> = {
   recruiter: {
-    es: 'Desarrollador front-end en Cantabria, con casi una década construyendo interfaces que aguantan producción. Empecé en ERPs industriales —distribución eléctrica, automoción, petroquímica— y desde 2021 me dedico a experiencias 3D en el navegador: showrooms y configuradores con Babylon.js sobre Vue. Fuera del horario mantengo sistemas completos de punta a punta, de un e-commerce con Nuxt 4 y Medusa a dos sistemas de trading algorítmico en Python con su propia suite de tests.',
-    en: 'Front-end developer based in northern Spain, with close to a decade of shipping interfaces that hold up in production. I started on industrial ERPs — power distribution, automotive, petrochemical — and since 2021 I have focused on 3D experiences in the browser: showrooms and configurators built with Babylon.js on top of Vue. Off the clock I run whole systems end to end, from a Nuxt 4 + Medusa storefront to two algorithmic trading systems in Python with their own test suite.',
+    es: 'Desarrollador front-end en Cantabria, con casi una década construyendo interfaces que aguantan producción. Empecé en ERPs industriales —distribución eléctrica, automoción, petroquímica— y desde 2021 me dedico a experiencias 3D en el navegador: showrooms y configuradores con Babylon.js sobre Vue 3 y Nuxt. Trabajo con agentes de IA integrados en el flujo diario, no como demo: revisión, refactor y documentación con criterio propio sobre lo que devuelven. Fuera del horario mantengo sistemas completos de punta a punta, de un e-commerce con Nuxt 4 y Medusa a dos sistemas de trading algorítmico en Python con su propia suite de tests.',
+    en: 'Front-end developer based in northern Spain, with close to a decade of shipping interfaces that hold up in production. I started on industrial ERPs — power distribution, automotive, petrochemical — and since 2021 I have focused on 3D experiences in the browser: showrooms and configurators built with Babylon.js on Vue 3 and Nuxt. AI agents are part of my daily workflow rather than a demo: review, refactor and documentation, with my own judgement applied to whatever comes back. Off the clock I run whole systems end to end, from a Nuxt 4 + Medusa storefront to two algorithmic trading systems in Python with their own test suite.',
   },
   anon: {
-    es: 'Desarrollador front-end con casi una década de experiencia. Primeros años en ERPs industriales para sectores regulados (distribución eléctrica, automoción, química); desde 2021, especializado en experiencias 3D y WebXR en el navegador con Babylon.js sobre Vue. Perfil de producto completo: llevo proyectos propios desde el diseño de la API hasta el despliegue y su monitorización.',
-    en: 'Front-end developer with close to a decade of experience. Early years on industrial ERPs for regulated sectors (power distribution, automotive, chemical); since 2021, specialised in 3D and WebXR browser experiences with Babylon.js on top of Vue. Full-product profile: personal projects taken from API design through to deployment and monitoring.',
+    es: 'Desarrollador front-end con casi una década de experiencia. Primeros años en ERPs industriales para sectores regulados (distribución eléctrica, automoción, química); desde 2021, especializado en experiencias 3D y WebXR en el navegador con Babylon.js sobre Vue 3 y Nuxt. Agentes de IA integrados en el trabajo diario, con criterio propio sobre lo que producen. Perfil de producto completo: llevo proyectos propios desde el diseño de la API hasta el despliegue y su monitorización.',
+    en: 'Front-end developer with close to a decade of experience. Early years on industrial ERPs for regulated sectors (power distribution, automotive, chemical); since 2021, specialised in 3D and WebXR browser experiences with Babylon.js on Vue 3 and Nuxt. AI agents integrated into daily work, with my own judgement applied to what they produce. Full-product profile: personal projects taken from API design through to deployment and monitoring.',
   },
   accenture: {
-    es: 'Senior Front-End Developer con más de 9 años de experiencia profesional, 8 de ellos con Vue.js. Especializado en experiencias 3D/WebXR en el navegador (Babylon.js) para eCommerce global, con recorrido previo en ERPs de gran cliente. Scrum y Kanban, interlocución directa con cliente y co-redacción de documentación técnica.',
-    en: 'Senior Front-End Developer with 9+ years of professional experience, 8 of them with Vue.js. Specialised in 3D/WebXR browser experiences (Babylon.js) for global eCommerce, with prior background in large-client ERPs. Scrum and Kanban, direct client interaction, and co-authoring of technical documentation.',
+    es: 'Senior Front-End Developer con más de 9 años de experiencia profesional, 8 de ellos con Vue. Especializado en experiencias 3D/WebXR en el navegador (Babylon.js) sobre Vue 3 y Nuxt para eCommerce global, con recorrido previo en ERPs de gran cliente. Desarrollo asistido por agentes de IA en el día a día. Scrum y Kanban, interlocución directa con cliente y co-redacción de documentación técnica.',
+    en: 'Senior Front-End Developer with 9+ years of professional experience, 8 of them with Vue. Specialised in 3D/WebXR browser experiences (Babylon.js) on Vue 3 and Nuxt for global eCommerce, with prior background in large-client ERPs. AI-agent-assisted development as part of the daily workflow. Scrum and Kanban, direct client interaction, and co-authoring of technical documentation.',
   },
 }
 
@@ -103,7 +106,7 @@ export const jobs: Job[] = [
     roleInternal: { es: 'Front End Development Sr Analyst', en: 'Front End Development Sr Analyst' },
     start: '2021-09',
     end: null,
-    stack: ['Vue.js', 'Babylon.js', 'WebGL', 'WebXR', 'JavaScript', 'TypeScript', 'SCSS', 'Jira', 'AWS', 'Azure'],
+    stack: ['Vue 3', 'Nuxt', 'Babylon.js', 'WebGL', 'WebXR', 'TypeScript', 'JavaScript', 'SCSS', 'Jira', 'AWS', 'Azure'],
     highlights: [
       {
         client: 'Vertiv',
@@ -135,8 +138,20 @@ export const jobs: Job[] = [
       },
       {
         text: {
+          es: 'Desarrollo asistido por agentes de IA integrado en el flujo diario: generación y refactor con revisión propia, documentación técnica y automatización de tareas repetidas. La herramienta acelera; el criterio de qué se acepta y qué se descarta sigue siendo mío.',
+          en: 'AI-agent-assisted development woven into the daily workflow: generation and refactoring under my own review, technical documentation, and automation of repeated tasks. The tooling adds speed; the judgement about what ships and what gets thrown away stays mine.',
+        },
+      },
+      {
+        text: {
           es: 'Scrum y Kanban, reuniones directas con cliente para desarrollo y feedback continuos, y ticketing en Jira para el mantenimiento.',
           en: 'Scrum and Kanban, direct client meetings for continuous development and feedback, and Jira ticketing for maintenance.',
+        },
+      },
+      {
+        text: {
+          es: 'Trabajo 100 % en remoto con equipos distribuidos y cliente internacional, sosteniendo entregas y evaluaciones a lo largo de toda la etapa.',
+          en: 'Fully remote work with distributed teams and international clients, sustaining delivery and performance reviews throughout.',
         },
       },
     ],
@@ -269,7 +284,7 @@ export const skillGroups: SkillGroup[] = [
       { name: 'JavaScript (ES2023)', level: 93 },
       { name: 'CSS3 · SCSS', level: 90 },
       { name: 'Pinia · Vue Router', level: 88 },
-      { name: 'Nuxt 4 · SSR', level: 85 },
+      { name: 'Nuxt 4 · SSR · Nitro', level: 87 },
       { name: 'Vuetify', level: 85 },
       { name: 'Vite · PWA / Workbox', level: 82 },
       { name: 'TypeScript', level: 78 },
@@ -304,6 +319,7 @@ export const skillGroups: SkillGroup[] = [
     label: { es: 'Método', en: 'Ways of working' },
     skills: [
       { name: 'Scrum · Kanban', level: 90 },
+      { name: { es: 'Desarrollo asistido por IA', en: 'AI-assisted development' }, level: 88 },
       { name: { es: 'Interlocución con cliente', en: 'Client-facing work' }, level: 88 },
       { name: { es: 'Documentación técnica', en: 'Technical documentation' }, level: 85 },
       { name: 'Vitest · pytest', level: 82 },
@@ -311,6 +327,35 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
 ]
+
+/**
+ * Modalidad de trabajo.
+ *
+ * Va como bloque propio y no escondido en un bullet porque para muchas ofertas
+ * es criterio de descarte en el primer filtro, y porque el dato interesante no
+ * es "quiero teletrabajo": es que lleva ocho años haciéndolo sin interrupción y
+ * con resultados detrás. Los años los calcula `remoteSince`, como todo lo demás.
+ */
+export const workingModel = {
+  headline: {
+    es: 'Remoto continuado desde 2018',
+    en: 'Continuously remote since 2018',
+  } as I18nText,
+  points: [
+    {
+      es: 'Ocho años seguidos en remoto, sin volver a presencial por el camino: primero en equipo distribuido nacional y desde 2021 con cliente internacional.',
+      en: 'Eight unbroken years working remotely, with no return to on-site along the way: first in a distributed national team, and since 2021 with international clients.',
+    },
+    {
+      es: 'Evaluaciones de desempeño y entregas sostenidas durante todo ese tiempo. El remoto no es una concesión que haya que compensar: es la forma en la que llevo casi toda mi carrera entregando.',
+      en: 'Sustained performance reviews and delivery across that whole period. Remote is not a concession to be compensated for: it is how I have delivered for most of my career.',
+    },
+    {
+      es: 'El horario flexible y la conciliación han sido palanca de rendimiento, no un coste: menos interrupciones, bloques largos de trabajo profundo y disponibilidad real en las franjas donde el equipo coincide.',
+      en: 'Flexible hours and work-life balance have been a lever on output rather than a cost: fewer interruptions, long blocks of deep work, and genuine availability in the windows where the team overlaps.',
+    },
+  ] as I18nText[],
+}
 
 export const industries: I18nText[] = [
   { es: 'eCommerce y retail de lujo', en: 'eCommerce & luxury retail' },
@@ -329,8 +374,9 @@ export const languages = [
 
 /** Lo que el formato interno de Accenture pide y ningún otro CV tiene. */
 export const functionalExpertise: I18nText[] = [
-  { es: 'Desarrollo front-end (Vue.js)', en: 'Front-end development (Vue.js)' },
+  { es: 'Desarrollo front-end (Vue 3, Nuxt)', en: 'Front-end development (Vue 3, Nuxt)' },
   { es: 'Desarrollo Web XR (Babylon.js)', en: 'Web XR development (Babylon.js)' },
+  { es: 'Desarrollo asistido por agentes de IA', en: 'AI-agent-assisted development' },
   { es: 'Metodología Scrum', en: 'Scrum methodologies' },
   { es: 'Metodología Kanban', en: 'Kanban methodologies' },
   { es: 'Nociones de AWS y Azure', en: 'AWS and Azure basics' },

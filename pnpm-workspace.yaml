@@ -1,6 +1,10 @@
-# Solo estos dos paquetes pueden ejecutar scripts de instalación:
-# esbuild y unrs-resolver traen binarios que se compilan/descargan en postinstall
-# y sin ellos vitest y el linter no arrancan.
+# Solo estos paquetes pueden ejecutar scripts de instalación.
+#
+# esbuild y unrs-resolver traen binarios que se compilan o descargan en
+# postinstall, y sin ellos ni vitest ni el linter arrancan. @sentry/cli baja el
+# binario que sube los source maps durante el build: sin él los errores llegan
+# minificados a Sentry y no sirven para nada.
 allowBuilds:
+  '@sentry/cli': true
   esbuild: true
   unrs-resolver: true

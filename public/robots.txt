@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /print/
+Disallow: /en/print/
 
 Sitemap: https://krahegwen.com/sitemap.xml

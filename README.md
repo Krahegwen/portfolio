@@ -38,7 +38,7 @@ envejecen solos y a la vez.
 
 ## Arrancar
 
-Requisitos: Node ≥ 22.12 (`.nvmrc` manda) y pnpm.
+Requisitos: Node 24 (`.nvmrc` manda) y pnpm.
 
 ```bash
 pnpm install
@@ -79,6 +79,47 @@ reescribe la página. Cada idioma se prerrenderiza, se indexa y se puede
 compartir; con una cookie, las dos versiones vivirían en la misma URL y Google
 las trataría como contenido duplicado. Los ficheros de `app/pages/en/` son
 envoltorios de tres líneas: `useLocale` deduce el idioma de la ruta.
+
+### Formulario, avisos y analítica
+
+El formulario de contacto (`server/api/contacto.post.ts`) es, junto al aviso de
+descarga, **lo único que ejecuta algo en producción**. El resto del sitio sigue
+siendo estático.
+
+Sin CAPTCHA a propósito: un buzón personal no recibe el volumen que justifica
+poner un muro delante de cada persona que quiere escribir. Tres filtros baratos
+—campo trampa, tiempo mínimo de relleno y límite por IP— paran el spam
+automatizado. Si dejan de bastar, el siguiente paso está en DESPLIEGUE.md.
+
+Los avisos salen por **Sentry**, que ya está montado para errores y trae reglas
+de alerta por correo sin dar de alta otro proveedor. La contrapartida está
+declarada en /privacidad: los mensajes viven en Sentry. Todo el transporte pasa
+por `server/utils/notificar.ts`, así que cambiarlo por un correo de verdad es
+reescribir una función.
+
+De las descargas de CV se registra **qué variante, en qué idioma y cuándo**.
+Nunca quién: ni IP, ni user-agent, ni referrer. El aviso lo dispara la página
+porque el PDF es un fichero estático que Vercel sirve sin pasar por el servidor;
+la consecuencia es que el recuento es una aproximación, y es un precio que se
+paga a gusto por no interponer una redirección entre alguien y su descarga.
+
+### Privacidad
+
+**No hay cookies.** Ni propias ni de terceros, y por eso no hay banner: un aviso
+de cookies en una web sin cookies es ruido que se firma sin leer. Lo único que
+se guarda en el navegador es `kw-theme`, con `light` o `dark`.
+
+Las tipografías **están autoalojadas** (`public/fonts/`, 392 KB). Cargarlas desde
+Google Fonts, que es lo normal, habría enviado la IP de cada visitante a Google
+en cada carga; ahora también ahorra dos handshakes en la ruta crítica.
+
+Sentry va con `sendDefaultPii: false` en cliente y servidor, y las analíticas de
+Vercel no ponen cookies ni identificador persistente.
+
+`content/privacidad.ts` es el texto que se publica, y **`tests/privacidad.spec.ts`
+ata cada afirmación a una comprobación sobre el código**: si alguien añade una
+cookie o vuelve a cargar fuentes de Google, el test falla antes de que el
+documento se vuelva mentira.
 
 ### Animación
 
@@ -126,19 +167,25 @@ Viven en local y **no están en el repo** (`tests/` y `vitest.config.ts` están 
 `devDependencies` sí están versionadas, así que `pnpm test` funcionará sin tocar
 nada más.
 
-Son 43 y cubren tres cosas: la aritmética de fechas, la coherencia del contenido
-(fechas sin huecos ni solapes, slugs únicos, traducciones sin olvidos) y —la
-importante— que los nombres de cliente no se escapen de la variante interna.
+Son 61 y cubren cuatro cosas: la aritmética de fechas, la coherencia del
+contenido (fechas sin huecos ni solapes, slugs únicos, traducciones sin
+olvidos), la paridad de los dos árboles de rutas, y las dos que de verdad
+importan — que los nombres de cliente no se escapen de la variante interna, y
+que la política de privacidad siga siendo cierta.
 
 ## Despliegue
 
-Vercel, con todo prerrenderizado (`nitro.prerender`): no hay ninguna función
-serverless en producción. `vercel.json` fija las cabeceras de seguridad.
+Vercel. Las 27 páginas se prerrenderizan (`nitro.prerender`) y las dos únicas
+funciones serverless son `/api/contacto` y `/api/descarga`. `vercel.json` fija
+las cabeceras de seguridad.
 
 La CSP lleva `'unsafe-inline'` en dos sitios y no es por dejadez: en `style-src`
 es el precio de los `<style>` que Vue inyecta por componente, y en `script-src` lo
 pide el script que fija el tema antes del primer pintado (sin él hay un destello
-de tema equivocado). `connect-src 'self'` porque la página no llama a nadie.
+de tema equivocado).
+
+Variables de entorno en [`.env.example`](.env.example). **Todas opcionales**: sin
+ninguna el sitio funciona entero, solo que no avisa a nadie.
 
 ### DNS
 

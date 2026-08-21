@@ -9,6 +9,7 @@ import {
   languages,
   skillGroups,
   summary,
+  workingModel,
 } from '~~/content/profile'
 import { formatDuration, formatRange, yearsSince } from '~/utils/dates'
 
@@ -31,6 +32,7 @@ const email = computed(() => (isInternal.value ? identity.emailInternal : identi
 const role = computed(() => (isInternal.value ? identity.titleInternal : identity.title))
 
 const totalYears = computed(() => yearsSince(identity.careerStart))
+const remoteYears = computed(() => yearsSince(identity.remoteSince))
 const vueYears = computed(() => yearsSince(identity.vueStart))
 const xrYears = computed(() => yearsSince(identity.xrStart))
 
@@ -39,6 +41,7 @@ const yearsGrid = computed(() => [
   { label: t({ es: 'Experiencia total', en: 'Total experience' }), value: totalYears.value },
   { label: t({ es: 'Vue.js', en: 'Vue.js' }), value: vueYears.value },
   { label: t({ es: '3D / WebXR', en: '3D / WebXR' }), value: xrYears.value },
+  { label: t({ es: 'En remoto', en: 'Remote' }), value: remoteYears.value },
 ])
 </script>
 
@@ -80,6 +83,7 @@ const yearsGrid = computed(() => [
           {{ identity.phone }}
         </li>
         <li v-if="!isInternal"><a :href="identity.github">github.com/{{ identity.handle }}</a></li>
+        <li v-if="!isInternal"><a :href="identity.linkedin">linkedin.com/in/diego-portilla-tejería</a></li>
         <li v-if="!isInternal"><a :href="identity.site">krahegwen.com</a></li>
       </ul>
       <ul v-else class="cv__contact mono">
@@ -96,6 +100,25 @@ const yearsGrid = computed(() => [
       <p class="cv__summary">
         {{ t(summary[variant]) }}
       </p>
+    </section>
+
+    <!-- ─────────── modalidad de trabajo ───────────
+         Va aquí, pegado al perfil, porque en muchas ofertas el remoto es
+         criterio de descarte en el primer filtro y conviene resolverlo antes
+         de que nadie llegue a la experiencia. -->
+    <section class="cv__block">
+      <h2 class="cv__h2">
+        {{ t({ es: 'Modalidad de trabajo', en: 'Working model' }) }}
+      </h2>
+      <p class="cv__work-headline">
+        {{ t(workingModel.headline) }}
+        <span class="cv__work-years mono">{{ remoteYears }} {{ t({ es: 'años', en: 'years' }) }}</span>
+      </p>
+      <ul class="cv__points">
+        <li v-for="(point, i) in workingModel.points" :key="i">
+          {{ t(point) }}
+        </li>
+      </ul>
     </section>
 
     <!-- ─────────── rejilla de años: solo formato interno ─────────── -->
@@ -334,8 +357,26 @@ const yearsGrid = computed(() => [
 
 .cv__years {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
+  gap: 0.85rem;
+}
+
+.cv__work-headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cv__work-years {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  color: var(--accent);
 }
 
 .cv__year {
