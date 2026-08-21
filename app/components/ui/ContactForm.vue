@@ -8,7 +8,6 @@
  */
 
 const { locale, t, localePath } = useLocale()
-const { evento } = useAnalytics()
 
 type Estado = 'listo' | 'enviando' | 'enviado' | 'error'
 
@@ -54,6 +53,10 @@ const mensajesError: Record<string, { es: string, en: string }> = {
   'datos-invalidos': { es: 'Algún campo no ha pasado la validación. Revísalos y vuelve a intentarlo.', en: 'A field failed validation. Check them and try again.' },
   'formulario-caducado': { es: 'El formulario ha caducado. Recarga la página y vuelve a escribirlo.', en: 'The form expired. Reload the page and write it again.' },
   'demasiados-envios': { es: 'Has enviado varios mensajes seguidos. Espera unos minutos.', en: 'You have sent several messages in a row. Give it a few minutes.' },
+  // El correo no salió. Se dice tal cual, con la alternativa al lado: prometer
+  // que ha llegado un mensaje que se ha perdido es peor que dar el error.
+  'sin-transporte': { es: 'El aviso por correo no está configurado todavía. Escríbeme directamente a la dirección de aquí al lado.', en: 'Email notifications are not configured yet. Write to me directly at the address next to this form.' },
+  'envio-fallido': { es: 'No he podido entregar el mensaje. Escríbeme directamente a la dirección de aquí al lado.', en: 'I could not deliver the message. Write to me directly at the address next to this form.' },
 }
 
 async function enviar() {
@@ -78,7 +81,6 @@ async function enviar() {
     })
 
     estado.value = 'enviado'
-    evento('contacto_enviado', { idioma: locale.value })
   }
   catch (error) {
     estado.value = 'error'

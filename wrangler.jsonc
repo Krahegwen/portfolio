@@ -1,0 +1,56 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "krahegwen",
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2026-08-01",
+
+  // Nitro necesita las APIs de Node en el runtime de Workers. Sin esta bandera
+  // el Worker ni siquiera arranca.
+  "compatibility_flags": ["nodejs_compat"],
+
+  /*
+   * Las 27 páginas prerrenderizadas, los PDF, las tipografías y las tarjetas
+   * sociales se sirven como activos estáticos, sin invocar el Worker. Solo
+   * llegan a él `/api/contacto` y `/api/descarga`.
+   */
+  "assets": {
+    "directory": ".output/public",
+    "binding": "ASSETS",
+
+    /*
+     * Sin barra final, que es como están escritas todas las URL del sitio.
+     *
+     * El comportamiento por defecto redirige `/cv` a `/cv/`, y eso contradice
+     * el `canonical`, los `hreflang` y el sitemap, que dicen `/cv`: Google se
+     * encuentra una página que se declara en una dirección y responde con una
+     * redirección a otra. Con esto la redirección va al revés y las tres cosas
+     * cuentan lo mismo.
+     */
+    "html_handling": "drop-trailing-slash",
+
+    // Las rutas que no existen reciben la página de error prerenderizada, no el
+    // 404 pelado de Cloudflare.
+    "not_found_handling": "404-page"
+  },
+
+  /*
+   * Envío de correo nativo: sin clave de API que custodiar. El dominio del
+   * remitente tiene que estar dado de alta antes del primer envío —ver
+   * DESPLIEGUE.md—; hasta entonces el formulario devuelve 503 y enseña la
+   * dirección para escribir directamente, en lugar de tragarse el mensaje.
+   */
+  "send_email": [
+    { "name": "EMAIL" }
+  ],
+
+  "vars": {
+    "AVISOS_DESTINO": "diego.portilla@protonmail.com",
+    "AVISOS_REMITENTE": "web@krahegwen.com",
+    // `no` silencia los avisos de descarga sin tocar código ni redesplegar.
+    "AVISAR_DESCARGAS": "si"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

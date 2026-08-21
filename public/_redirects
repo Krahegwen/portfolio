@@ -1,0 +1,7 @@
+# Atajos que la gente teclea a mano o pega desde un CV antiguo.
+# 301 = permanente, 302 = temporal. Sintaxis: origen destino código.
+
+/curriculum      /cv             301
+/resume          /en/cv          301
+/projects        /en/projects    302
+/en/proyectos    /en/projects    301

@@ -3,7 +3,6 @@ import type { CvVariant } from '~~/content/profile'
 import { identity } from '~~/content/profile'
 
 const { locale, t, localePath } = useLocale()
-const { evento } = useAnalytics()
 const route = useRoute()
 const router = useRouter()
 
@@ -59,7 +58,6 @@ const activeMeta = computed(() => variants.value.find(v => v.id === active.value
 
 function select(id: CvVariant) {
   router.replace({ query: id === 'recruiter' ? {} : { v: id } })
-  evento('cv_variante_vista', { variante: id, idioma: locale.value })
 }
 
 /**
@@ -72,7 +70,6 @@ function select(id: CvVariant) {
  * es secundario; entregar el PDF, no.
  */
 function alDescargar() {
-  evento('cv_descargado', { variante: active.value, idioma: locale.value })
   try {
     void fetch('/api/descarga', {
       method: 'POST',

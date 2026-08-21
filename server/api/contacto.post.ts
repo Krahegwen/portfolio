@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { notificar } from '../utils/notificar'
+import { SinTransporte, notificar } from '../utils/notificar'
 
 /**
  * Formulario de contacto.
@@ -113,17 +113,35 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 429, statusMessage: 'demasiados-envios' })
   }
 
-  notificar({
-    tipo: 'contacto',
-    titulo: `Contacto desde krahegwen.com — ${nombre}`,
-    datos: {
-      nombre,
-      email,
-      mensaje,
-      idioma: typeof cuerpo?.idioma === 'string' ? cuerpo.idioma : undefined,
-      recibido: new Date(ahora).toISOString(),
-    },
-  })
+  const idioma = cuerpo?.idioma === 'en' ? 'en' : 'es'
+
+  try {
+    await notificar(event, {
+      tipo: 'contacto',
+      asunto: `krahegwen.com — ${nombre}`,
+      // El `replyTo` es la gracia de mandarlo por correo: responder es darle a
+      // "Responder", sin copiar direcciones a mano desde un panel.
+      responderA: email,
+      campos: [
+        ['De', `${nombre} <${email}>`],
+        ['Idioma', idioma === 'es' ? 'Español' : 'Inglés'],
+        ['Mensaje', mensaje],
+        ['Recibido', new Date(ahora).toISOString()],
+      ],
+    })
+  }
+  catch (error) {
+    /*
+     * Si el correo no sale, **no** se responde `ok`. Decirle a alguien que su
+     * mensaje ha llegado cuando se ha perdido es peor que darle un error: con
+     * el error, el formulario le enseña la dirección para escribir directamente.
+     */
+    console.error('[contacto] el aviso no salió:', error)
+    throw createError({
+      statusCode: 503,
+      statusMessage: error instanceof SinTransporte ? 'sin-transporte' : 'envio-fallido',
+    })
+  }
 
   return { ok: true }
 })

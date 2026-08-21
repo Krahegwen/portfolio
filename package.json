@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
+    "preview": "wrangler dev",
+    "deploy": "wrangler deploy",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "vue-tsc --noEmit -p .nuxt/tsconfig.json",
@@ -20,9 +20,6 @@
     "og": "node scripts/build-og.mjs"
   },
   "dependencies": {
-    "@sentry/nuxt": "^10.70.0",
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/speed-insights": "^2.0.0",
     "gsap": "^3.13.0",
     "nuxt": "^4.2.1",
     "vue": "^3.5.22",
@@ -36,6 +33,7 @@
     "happy-dom": "^20.0.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11",
-    "vue-tsc": "^3.3.10"
+    "vue-tsc": "^3.3.10",
+    "wrangler": "4.123.0"
   }
 }

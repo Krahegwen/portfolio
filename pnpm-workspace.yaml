@@ -1,10 +1,9 @@
 # Solo estos paquetes pueden ejecutar scripts de instalación.
 #
-# esbuild y unrs-resolver traen binarios que se compilan o descargan en
-# postinstall, y sin ellos ni vitest ni el linter arrancan. @sentry/cli baja el
-# binario que sube los source maps durante el build: sin él los errores llegan
-# minificados a Sentry y no sirven para nada.
+# Los tres traen binarios que se compilan o descargan en postinstall: sin
+# esbuild y unrs-resolver no arrancan ni vitest ni el linter, y workerd es el
+# runtime de Workers que usa `wrangler dev` para servir el sitio en local.
 allowBuilds:
-  '@sentry/cli': true
   esbuild: true
   unrs-resolver: true
+  workerd: true

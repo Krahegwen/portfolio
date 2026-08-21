@@ -44,7 +44,7 @@ const LOCALES = [
 const outDirs = [join(root, 'public/cv'), join(root, 'CV/2026')]
 outDirs.forEach(dir => mkdirSync(dir, { recursive: true }))
 
-const STATIC = join(root, '.vercel/output/static')
+const STATIC = join(root, '.output/public')
 
 if (!existsSync(join(STATIC, 'index.html'))) {
   throw new Error('No hay build. Ejecuta `pnpm build` antes que esto.')

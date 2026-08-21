@@ -5,6 +5,16 @@ const { locale, alternatePath } = useLocale()
 const route = useRoute()
 
 /**
+ * Cloudflare Web Analytics. Sin token no se inyecta nada, así que en local y en
+ * cualquier despliegue sin la variable el sitio no mide.
+ *
+ * No pone cookies ni identificador persistente —de ahí que no haya banner— y a
+ * cambio no tiene eventos propios: para saber cuántos CV se bajan está el aviso
+ * de `/api/descarga`, y para el formulario, el correo que llega.
+ */
+const analyticsToken = useRuntimeConfig().public.analyticsToken
+
+/**
  * Una sola forma de escribir cada URL. La portada es `.../` con barra, y ese
  * mismo texto es el que va en el canonical, en los `hreflang` y en el sitemap:
  * si el canonical dice `krahegwen.com` y el alternate dice `krahegwen.com/`,
@@ -45,6 +55,13 @@ useHead(() => ({
     { rel: 'alternate', hreflang: 'x-default', href: alternates.value.es },
   ],
   script: [
+    ...(analyticsToken
+      ? [{
+          src: 'https://static.cloudflareinsights.com/beacon.min.js',
+          'defer': true,
+          'data-cf-beacon': JSON.stringify({ token: analyticsToken }),
+        }]
+      : []),
     // Antes del primer pintado, para que no haya destello de tema equivocado.
     {
       innerHTML: `try{var t=localStorage.getItem('kw-theme');if(t==='light')document.documentElement.dataset.theme='light'}catch(e){}`,

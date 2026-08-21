@@ -1,7 +1,7 @@
 # krahegwen.com
 
-CV dinámico y portfolio de Diego Portilla Tejería. Nuxt 4, GSAP y nada más:
-sin CMS, sin base de datos y sin nada que ejecutar en producción.
+CV dinámico y portfolio de Diego Portilla Tejería. Nuxt 4 y GSAP sobre
+Cloudflare Workers: sin CMS, sin base de datos y con un solo proveedor.
 
 **En producción:** [krahegwen.com](https://krahegwen.com)
 
@@ -48,7 +48,9 @@ pnpm dev
 | Comando | Qué hace |
 |---|---|
 | `pnpm dev` | Servidor de desarrollo |
-| `pnpm build` | Build de producción a `.vercel/output` |
+| `pnpm build` | Build de producción a `.output` |
+| `pnpm preview` | Sirve el build con `wrangler dev`, el runtime real |
+| `pnpm deploy` | Despliega a Cloudflare Workers |
 | `pnpm test` | Los tests (ver más abajo) |
 | `pnpm lint` | ESLint |
 | `pnpm cv:pdf` | Regenera los seis PDF del CV. **Necesita `pnpm build` antes** |
@@ -91,17 +93,23 @@ poner un muro delante de cada persona que quiere escribir. Tres filtros baratos
 —campo trampa, tiempo mínimo de relleno y límite por IP— paran el spam
 automatizado. Si dejan de bastar, el siguiente paso está en DESPLIEGUE.md.
 
-Los avisos salen por **Sentry**, que ya está montado para errores y trae reglas
-de alerta por correo sin dar de alta otro proveedor. La contrapartida está
-declarada en /privacidad: los mensajes viven en Sentry. Todo el transporte pasa
-por `server/utils/notificar.ts`, así que cambiarlo por un correo de verdad es
-reescribir una función.
+Los avisos salen **por correo**, con el binding `send_email` de Cloudflare: sin
+clave de API que custodiar y sin proveedor externo por el que pasen los mensajes.
+El `replyTo` es la dirección de quien escribe, así que responder es darle a
+"Responder". Si el correo no sale, el endpoint devuelve 503 y el formulario
+enseña la dirección para escribir directamente — prometer que ha llegado un
+mensaje que se ha perdido es peor que dar el error.
+
+Todo el transporte pasa por `server/utils/notificar.ts`: cambiarlo por Telegram,
+un webhook o lo que sea es reescribir una función.
 
 De las descargas de CV se registra **qué variante, en qué idioma y cuándo**.
-Nunca quién: ni IP, ni user-agent, ni referrer. El aviso lo dispara la página
-porque el PDF es un fichero estático que Vercel sirve sin pasar por el servidor;
-la consecuencia es que el recuento es una aproximación, y es un precio que se
-paga a gusto por no interponer una redirección entre alguien y su descarga.
+Nunca quién: ni IP, ni user-agent, ni cabecera de procedencia. El aviso lo
+dispara la página porque el PDF es un fichero estático que Cloudflare sirve sin
+pasar por el Worker; la consecuencia es que el recuento es una aproximación, y
+es un precio que se paga a gusto por no interponer una redirección entre alguien
+y su descarga. Hay media hora de silencio por variante para que curiosear las
+seis versiones no genere seis correos.
 
 ### Privacidad
 
@@ -113,8 +121,10 @@ Las tipografías **están autoalojadas** (`public/fonts/`, 392 KB). Cargarlas de
 Google Fonts, que es lo normal, habría enviado la IP de cada visitante a Google
 en cada carga; ahora también ahorra dos handshakes en la ruta crítica.
 
-Sentry va con `sendDefaultPii: false` en cliente y servidor, y las analíticas de
-Vercel no ponen cookies ni identificador persistente.
+Cloudflare Web Analytics tampoco pone cookies ni identificador persistente. Y no
+hay más proveedores: el sitio, la analítica y el correo del formulario salen
+todos de Cloudflare, así que la lista de terceros de la política tiene una sola
+entrada.
 
 `content/privacidad.ts` es el texto que se publica, y **`tests/privacidad.spec.ts`
 ata cada afirmación a una comprobación sobre el código**: si alguien añade una
@@ -149,7 +159,8 @@ se generaban en español sin que nada fallara. El script lo comprueba antes de
 imprimir cada hoja.
 
 Los artefactos (`public/cv/*.pdf`, `public/og*.png`) **están versionados a
-propósito**: Vercel no tiene Chrome, así que se generan en local y se suben.
+propósito**: el runner de build no tiene Chrome, así que se generan en local y
+se suben.
 Tras cambiar `content/profile.ts`:
 
 ```bash
@@ -167,7 +178,7 @@ Viven en local y **no están en el repo** (`tests/` y `vitest.config.ts` están 
 `devDependencies` sí están versionadas, así que `pnpm test` funcionará sin tocar
 nada más.
 
-Son 61 y cubren cuatro cosas: la aritmética de fechas, la coherencia del
+Son 65 y cubren cuatro cosas: la aritmética de fechas, la coherencia del
 contenido (fechas sin huecos ni solapes, slugs únicos, traducciones sin
 olvidos), la paridad de los dos árboles de rutas, y las dos que de verdad
 importan — que los nombres de cliente no se escapen de la variante interna, y
@@ -175,28 +186,32 @@ que la política de privacidad siga siendo cierta.
 
 ## Despliegue
 
-Vercel. Las 27 páginas se prerrenderizan (`nitro.prerender`) y las dos únicas
-funciones serverless son `/api/contacto` y `/api/descarga`. `vercel.json` fija
-las cabeceras de seguridad.
+**Cloudflare Workers** (preset `cloudflare_module`). Las 27 páginas se
+prerrenderizan y las sirve Static Assets sin invocar el Worker; lo único que se
+ejecuta son `/api/contacto` y `/api/descarga`. `wrangler.jsonc` tiene la
+configuración y `public/_headers` las cabeceras de seguridad.
+
+Un detalle que costó encontrar: Static Assets redirige `/cv` a `/cv/` por
+defecto, y eso contradice el `canonical`, los `hreflang` y el sitemap, que
+escriben las URL sin barra. `html_handling: "drop-trailing-slash"` invierte la
+redirección y deja las tres cosas contando lo mismo.
 
 La CSP lleva `'unsafe-inline'` en dos sitios y no es por dejadez: en `style-src`
 es el precio de los `<style>` que Vue inyecta por componente, y en `script-src` lo
 pide el script que fija el tema antes del primer pintado (sin él hay un destello
 de tema equivocado).
 
-Variables de entorno en [`.env.example`](.env.example). **Todas opcionales**: sin
-ninguna el sitio funciona entero, solo que no avisa a nadie.
+Variables en [`.env.example`](.env.example) y en `vars` de `wrangler.jsonc`.
+**Todas opcionales**: sin ninguna el sitio funciona entero, solo que no mide ni
+avisa.
 
 ### DNS
 
-El dominio está en Cloudflare. El ápice apunta a Vercel; los subdominios que ya
-existen (`brew`, `life`, `watch-store`) no se tocan.
+Todo vive en Cloudflare, así que el ápice es un **custom domain del Worker** y no
+un registro que apuntar a mano: Cloudflare crea y gestiona el DNS por su cuenta.
+Los subdominios que ya existen (`brew`, `life`, `watch-store`) no se tocan.
 
-| Tipo | Nombre | Valor | Proxy |
-|---|---|---|---|
-| A | `@` | `76.76.21.21` | **DNS only** |
-| CNAME | `www` | `cname.vercel-dns.com` | **DNS only** |
-
-En gris (DNS only), no naranja: con el proxy de Cloudflare por delante, Vercel no
-puede emitir ni renovar su certificado y la validación del dominio se queda
-colgada.
+Esto es media razón de haber elegido Cloudflare: con un proveedor externo el
+ápice tendría que ir en gris (DNS only), porque con el proxy naranja por delante
+el certificado del otro no llega a validarse. Aquí no hay dos partes que
+coordinar.
