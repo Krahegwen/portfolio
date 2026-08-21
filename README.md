@@ -3,7 +3,8 @@
 CV dinámico y portfolio de Diego Portilla Tejería. Nuxt 4 y GSAP sobre
 Cloudflare Workers: sin CMS, sin base de datos y con un solo proveedor.
 
-**En producción:** [krahegwen.com](https://krahegwen.com)
+**En producción:** [krahegwen.com](https://krahegwen.com) — TTFB 80-95 ms,
+205 KB en la primera carga con las tipografías incluidas.
 
 ## La idea
 

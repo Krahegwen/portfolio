@@ -1,25 +1,38 @@
 # Poner esto en marcha
 
-Todo en Cloudflare, que es donde ya viven `brew` y `life`. Tres pasos, y solo el
-segundo tiene algo de miga.
+**El sitio está en producción: [krahegwen.com](https://krahegwen.com).**
 
-> **El proyecto de Vercel se puede borrar.** No queda nada del código que dependa
-> de él: ni `vercel.json`, ni `@vercel/*`, ni el preset.
+| | Estado |
+|---|---|
+| Despliegue en Cloudflare Workers | ✅ hecho |
+| Dominio `krahegwen.com` | ✅ hecho |
+| Avisos del formulario | ⏳ falta el bot de Telegram — [paso 2](#2-avisos-por-telegram) |
+| Analítica | ⏳ falta el token — [paso 4](#4-analítica) |
+| `www.krahegwen.com` | ⚠️ no existe — opcional, ver abajo |
 
-## 1. Desplegar
+Medido sobre el dominio real: TTFB 80-95 ms y 205 KB en la primera carga,
+tipografías incluidas.
 
-Con wrangler ya autenticado (`npx wrangler whoami` lo confirma):
+## 1. Desplegar — hecho
 
 ```bash
 pnpm build && pnpm deploy
 ```
 
-Sale en `krahegwen.<subdominio>.workers.dev`. Compruébalo ahí antes de tocar el
-dominio.
+Eso es todo lo que hace falta para publicar un cambio. Si prefieres que despliegue
+solo en cada push, Cloudflare tiene **Workers Builds**: Dashboard → Workers → el
+proyecto → Settings → Builds → conectar `Krahegwen/portfolio`, con `pnpm build` y
+`npx wrangler deploy`.
 
-Si prefieres que despliegue solo en cada push, Cloudflare tiene **Workers Builds**:
-Dashboard → Workers → el proyecto → Settings → Builds → conectar
-`Krahegwen/portfolio`. Comando de build `pnpm build`, de deploy `npx wrangler deploy`.
+### `www`, si lo quieres
+
+`www.krahegwen.com` hoy no existe: quien lo teclee recibe un error de DNS del
+navegador en lugar del sitio. No es imprescindible —los `canonical` van todos sin
+`www`— pero cuesta un clic:
+
+Workers → `krahegwen` → Settings → Domains & Routes → Add → Custom Domain →
+`www.krahegwen.com`. Servirá el mismo sitio, y los `canonical` ya le dicen a
+Google cuál es la buena.
 
 ## 2. Avisos por Telegram
 
@@ -65,17 +78,14 @@ Cada descarga de CV manda un aviso, con media hora de silencio por variante para
 que curiosear las seis versiones no genere seis mensajes. Si aun así sobra:
 `AVISAR_DESCARGAS` a `no` en `wrangler.jsonc` y redesplegar.
 
-## 3. El dominio
+## 3. El dominio — hecho
 
-`krahegwen.com` **no resuelve a nada** ahora mismo. Los subdominios que ya
-funcionan (`brew`, `life`, `watch-store`, `watch-store-api`) **no se tocan**.
+`krahegwen.com` sirve el sitio con certificado válido, y `brew`, `life` y
+`watch-store` siguen apuntando a sus propios Workers, intactos.
 
-Dashboard → Workers → `krahegwen` → Settings → **Domains & Routes** → Add →
-Custom Domain → `krahegwen.com`. Y otra vez para `www.krahegwen.com`.
-
-Cloudflare crea el registro y emite el certificado por su cuenta. No hay que
-elegir gris ni naranja, ni copiar ninguna IP: esa es la parte que desaparece por
-estar todo en el mismo sitio.
+Quedó registrado para la próxima vez: no hubo que elegir gris ni naranja ni
+copiar ninguna IP. Cloudflare creó el registro y emitió el certificado por su
+cuenta, que es lo que se gana teniéndolo todo en el mismo sitio.
 
 ## 4. Analítica
 
