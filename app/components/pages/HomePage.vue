@@ -15,7 +15,7 @@ useSeoMeta({
   ogTitle: title,
   ogDescription: description,
   ogType: 'profile',
-  ogUrl: () => `${identity.site}${locale.value === 'en' ? '/en' : ''}`,
+  ogUrl: () => `${identity.site}${locale.value === 'en' ? '/en' : '/'}`,
   ogLocale: () => (locale.value === 'es' ? 'es_ES' : 'en_GB'),
   ogImage: () => `${identity.site}/og${locale.value === 'en' ? '-en' : ''}.png`,
   ogImageWidth: 1200,

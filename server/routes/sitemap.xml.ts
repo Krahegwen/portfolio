@@ -12,6 +12,9 @@ import { projects } from '~~/content/projects'
 
 const SITE = identity.site
 
+/** Misma normalización que `app.vue`: la portada siempre con barra final. */
+const url = (path: string) => `${SITE}${path === '/' ? '/' : path}`
+
 interface Entry { es: string, en: string, priority: string }
 
 const entries: Entry[] = [
@@ -30,12 +33,12 @@ export default defineEventHandler((event) => {
 
   const urls = entries.flatMap(entry => (['es', 'en'] as const).map(locale => `
   <url>
-    <loc>${SITE}${entry[locale]}</loc>
+    <loc>${url(entry[locale])}</loc>
     <lastmod>${lastmod}</lastmod>
     <priority>${entry.priority}</priority>
-    <xhtml:link rel="alternate" hreflang="es" href="${SITE}${entry.es}"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${SITE}${entry.en}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}${entry.es}"/>
+    <xhtml:link rel="alternate" hreflang="es" href="${url(entry.es)}"/>
+    <xhtml:link rel="alternate" hreflang="en" href="${url(entry.en)}"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${url(entry.es)}"/>
   </url>`))
 
   setHeader(event, 'content-type', 'application/xml; charset=utf-8')
