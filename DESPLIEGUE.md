@@ -7,7 +7,7 @@
 | Despliegue en Cloudflare Workers | ✅ hecho |
 | Dominio `krahegwen.com` | ✅ hecho |
 | Avisos del formulario | ⏳ falta el bot de Telegram — [paso 2](#2-avisos-por-telegram) |
-| Analítica | ⏳ falta el token — [paso 4](#4-analítica) |
+| Analítica | ⏳ falta el token, **y va en el build** — [paso 4](#4-analítica) |
 | `www.krahegwen.com` | ⚠️ no existe — opcional, ver abajo |
 
 Medido sobre el dominio real: TTFB 80-95 ms y 205 KB en la primera carga,
@@ -90,8 +90,30 @@ cuenta, que es lo que se gana teniéndolo todo en el mismo sitio.
 ## 4. Analítica
 
 Dashboard → Analytics & Logs → **Web Analytics** → Add a site → `krahegwen.com`.
-Copia el token y ponlo en Settings → Variables del Worker como
-`NUXT_PUBLIC_ANALYTICS_TOKEN`. Sin él, el script no se inyecta y no se mide nada.
+Copia el token.
+
+> **Va en el build, no en el Worker.** Es la trampa de este montaje: las páginas
+> están prerenderizadas y Cloudflare las sirve como ficheros estáticos, sin
+> invocar al Worker jamás. Una variable del Worker no las tocaría. El token se
+> hornea en el HTML **al compilar**.
+
+Si despliegas desde tu máquina, va en el `.env`:
+
+```
+NUXT_PUBLIC_ANALYTICS_TOKEN=el_token_que_te_dio_cloudflare
+```
+
+y luego `pnpm build && pnpm deploy`. Compruébalo antes de subir:
+
+```bash
+grep -o 'data-cf-beacon' .output/public/index.html
+```
+
+Si no imprime nada, el token no llegó al build y desplegar no serviría de nada.
+
+Si algún día lo pasas a **Workers Builds**, la variable va en Settings → Builds →
+Build variables, que sí se leen al compilar — no en Settings → Variables, que son
+de ejecución.
 
 No pone cookies ni identificador persistente, y por eso el sitio no lleva banner
 de consentimiento. Está explicado en `/privacidad` y hay tests que lo vigilan: si
