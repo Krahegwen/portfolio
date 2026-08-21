@@ -98,9 +98,14 @@ Se generan con el Chrome (o el Edge) que ya está instalado, no con Puppeteer:
 serían 150 MB de Chromium para lo que dos banderas de línea de comandos hacen
 igual. `scripts/chrome.mjs` localiza el binario; `CHROME_PATH` lo fuerza.
 
-Los PDF salen de las rutas `/print/cv/:variante` de la propia web —la misma
-`CvDocument.vue` que se ve en pantalla—, así que **no pueden discrepar del sitio**.
-Se sirven desde `public/cv/` y se copian a `CV/2026/`.
+Los PDF salen de las rutas `/print/cv/:variante` y `/en/print/cv/:variante` de la
+propia web —la misma `CvDocument.vue` que se ve en pantalla—, así que **no pueden
+discrepar del sitio**. Se sirven desde `public/cv/` y se copian a `CV/2026/`.
+
+El árbol inglés cuelga de `/en/print` y no de `/print/en` porque el idioma se
+deduce del prefijo `/en` de la ruta: con la otra forma los tres PDF marcados EN
+se generaban en español sin que nada fallara. El script lo comprueba antes de
+imprimir cada hoja.
 
 Los artefactos (`public/cv/*.pdf`, `public/og*.png`) **están versionados a
 propósito**: Vercel no tiene Chrome, así que se generan en local y se suben.
