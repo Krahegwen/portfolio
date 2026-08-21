@@ -18,10 +18,14 @@ export default defineNuxtConfig({
         '/404.html',
         '/sitemap.xml',
         // Las hojas de impresión no se enlazan desde ninguna página, así que el
-        // rastreador de enlaces no llegaría solas: hay que nombrarlas.
+        // rastreador de enlaces no llegaría solo: hay que nombrarlas.
+        //
+        // El árbol inglés cuelga de /en/print y no de /print/en porque el idioma
+        // se deduce del prefijo /en de la ruta. Con /print/en los seis PDF salían
+        // en español sin que nada fallara.
         ...['recruiter', 'anon', 'accenture'].flatMap(v => [
           `/print/cv/${v}`,
-          `/print/en/cv/${v}`,
+          `/en/print/cv/${v}`,
         ]),
       ],
     },

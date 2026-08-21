@@ -29,9 +29,16 @@ const VARIANTS = [
   { id: 'accenture', suffix: '-Accenture' },
 ]
 
+/**
+ * `expect` no es decoración. El idioma lo deduce `useLocale` del prefijo de la
+ * ruta, así que una hoja colgada del sitio equivocado del árbol se genera
+ * perfectamente y en el idioma que no es — pasó con `/print/en/cv`, y seis PDF
+ * marcados EN salieron en español sin que nada fallara. Comprobar una palabra
+ * del encabezado antes de imprimir cuesta una petición y cierra ese agujero.
+ */
 const LOCALES = [
-  { id: 'es', path: '/print/cv', tag: 'ES' },
-  { id: 'en', path: '/print/en/cv', tag: 'EN' },
+  { id: 'es', path: '/print/cv', tag: 'ES', expect: '>Perfil<', reject: '>Profile<' },
+  { id: 'en', path: '/en/print/cv', tag: 'EN', expect: '>Profile<', reject: '>Perfil<' },
 ]
 
 const outDirs = [join(root, 'public/cv'), join(root, 'CV/2026')]
@@ -54,6 +61,15 @@ try {
     for (const variant of VARIANTS) {
       const name = `Diego-Portilla-CV${variant.suffix}-${locale.tag}.pdf`
       const target = join(root, 'public/cv', name)
+      const source = `${BASE}${locale.path}/${variant.id}`
+
+      const html = await (await fetch(source)).text()
+      if (!html.includes(locale.expect) || html.includes(locale.reject)) {
+        throw new Error(
+          `${source} no está en ${locale.tag}. El idioma sale del prefijo de la `
+          + `ruta: comprueba que la página cuelga del árbol correcto.`,
+        )
+      }
 
       await runChrome([
         '--no-pdf-header-footer',
@@ -61,7 +77,7 @@ try {
         // y declararlos en dos sitios los suma.
         `--print-to-pdf=${target}`,
         '--virtual-time-budget=9000',
-        `${BASE}${locale.path}/${variant.id}`,
+        source,
       ])
 
       if (!existsSync(target)) throw new Error(`Chrome no escribió ${name}`)
