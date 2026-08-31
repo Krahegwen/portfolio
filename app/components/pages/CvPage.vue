@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CvVariant } from '~~/content/profile'
+import { VARIANTES, esPrivada, ficheroCv, urlCv } from '~~/content/cv'
 import { identity } from '~~/content/profile'
 
 const { locale, t, localePath } = useLocale()
@@ -10,7 +11,6 @@ interface VariantMeta {
   id: CvVariant
   label: string
   blurb: string
-  file: string
 }
 
 const variants = computed<VariantMeta[]>(() => [
@@ -21,7 +21,6 @@ const variants = computed<VariantMeta[]>(() => [
       es: 'Para recruiters y para quien llegue por la web. Identidad completa, contacto y proyectos propios. Los clientes salen por sector, nunca por nombre.',
       en: 'For recruiters and anyone arriving from the web. Full identity, contact details and personal projects. Clients appear by sector, never by name.',
     }),
-    file: `Diego-Portilla-CV-${locale.value.toUpperCase()}.pdf`,
   },
   {
     id: 'anon',
@@ -30,7 +29,6 @@ const variants = computed<VariantMeta[]>(() => [
       es: 'Para procesos de selección ciegos. Sin nombre, sin contacto y sin ubicación exacta; se mantienen empleadores, fechas y sustancia técnica.',
       en: 'For blind hiring processes. No name, no contact, no exact location; employers, dates and technical substance stay.',
     }),
-    file: `Diego-Portilla-CV-Anon-${locale.value.toUpperCase()}.pdf`,
   },
   {
     id: 'accenture',
@@ -39,32 +37,120 @@ const variants = computed<VariantMeta[]>(() => [
       es: 'El formato de staffing: años por tecnología, expertise funcional, correo corporativo y —solo aquí— el nombre de los clientes.',
       en: 'The staffing format: years per technology, functional expertise, corporate email and — only here — the client names.',
     }),
-    file: `Diego-Portilla-CV-Accenture-${locale.value.toUpperCase()}.pdf`,
   },
 ])
 
-const VALID: CvVariant[] = ['recruiter', 'anon', 'accenture']
+/*
+ * ─────────────── El pase ───────────────
+ *
+ * La página ofrece **un** CV, el público. Las otras dos existen igual, pero no
+ * se enseñan: una es un CV sin nombre en una web firmada con nombre, y la otra
+ * nombra clientes. Ofrecer las tres a cualquiera que pase quedaba raro.
+ *
+ * Esto de aquí es solo la parte visible del pestillo: `desbloqueado` decide qué
+ * se pinta y nada más. La puerta que importa está en el servidor —la cookie que
+ * emite `/api/cv/desbloquear`— y la guardan la descarga de esos PDF y sus hojas
+ * de impresión. Trastear con esta variable desde la consola no descarga nada.
+ */
+
+/** Solo recuerda hasta cuándo vale la cookie. Ni la clave ni nada de quién. */
+const MEMORIA = 'kw-cv'
+
+const desbloqueado = ref(false)
+const pidiendoClave = ref(false)
+
+function recordar(caduca: number) {
+  try {
+    localStorage.setItem(MEMORIA, String(caduca))
+  }
+  catch { /* modo privado, o almacenamiento lleno: se queda en esta pestaña */ }
+}
+
+function olvidar() {
+  try {
+    localStorage.removeItem(MEMORIA)
+  }
+  catch { /* igual da: la cookie es la que manda */ }
+}
+
+onMounted(() => {
+  let caduca = 0
+  try {
+    caduca = Number(localStorage.getItem(MEMORIA) ?? 0)
+  }
+  catch { /* sin almacenamiento no hay nada que recuperar */ }
+
+  if (caduca > Date.now()) desbloqueado.value = true
+  else olvidar()
+})
+
+function alDesbloquear(caduca: number) {
+  desbloqueado.value = true
+  recordar(caduca)
+}
+
+async function bloquear() {
+  desbloqueado.value = false
+  olvidar()
+  router.replace({ query: {} })
+  // Que no baste con borrar el recuerdo: la cookie se retira de verdad.
+  await $fetch('/api/cv/bloquear', { method: 'POST' }).catch(() => {})
+}
+
+/*
+ * Diez clics en el epígrafe. Tienen que ser seguidos: si pasan dos segundos y
+ * medio entre dos, la cuenta vuelve a empezar. Así nadie llega por accidente
+ * leyendo con el ratón en la mano, y quien lo sabe tarda tres segundos.
+ */
+const CLICS = 10
+const SEGUIDOS_MS = 2500
+const cuenta = ref(0)
+let ultimo = 0
+
+function tocarEpigrafe() {
+  if (desbloqueado.value) return
+
+  const ahora = Date.now()
+  cuenta.value = ahora - ultimo > SEGUIDOS_MS ? 1 : cuenta.value + 1
+  ultimo = ahora
+
+  if (cuenta.value >= CLICS) {
+    cuenta.value = 0
+    pidiendoClave.value = true
+  }
+}
+
+/*
+ * ─────────────── La variante ───────────────
+ */
+
+const visibles = computed(() =>
+  desbloqueado.value ? variants.value : variants.value.filter(v => !esPrivada(v.id)),
+)
 
 /**
  * La variante vive en la query, no en un ref suelto: así un enlace a
- * `/cv?v=anon` abre directamente la versión anónima y se puede compartir.
+ * `/cv?v=anon` abre directamente la versión anónima y se puede compartir —con
+ * quien tenga el pase; sin él, se cae a la pública—.
  */
 const active = computed<CvVariant>(() => {
-  const value = route.query.v
-  return VALID.includes(value as CvVariant) ? (value as CvVariant) : 'recruiter'
+  const pedida = route.query.v as CvVariant
+  if (!VARIANTES.includes(pedida)) return 'recruiter'
+  return esPrivada(pedida) && !desbloqueado.value ? 'recruiter' : pedida
 })
 
 const activeMeta = computed(() => variants.value.find(v => v.id === active.value)!)
+const fichero = computed(() => ficheroCv(active.value, locale.value))
 
 function select(id: CvVariant) {
   router.replace({ query: id === 'recruiter' ? {} : { v: id } })
 }
 
 /**
- * El PDF es un fichero estático que sirve Vercel sin pasar por el servidor, así
- * que el aviso lo manda la página. `keepalive` es lo que hace que la petición
- * sobreviva a la navegación que dispara la descarga; sin él el navegador la
- * cancela a mitad y el aviso se pierde.
+ * El PDF público es un fichero estático que sirve Cloudflare sin pasar por el
+ * servidor, así que el aviso lo manda la página. `keepalive` es lo que hace que
+ * la petición sobreviva a la navegación que dispara la descarga; sin él el
+ * navegador la cancela a mitad y el aviso se pierde.
  *
  * No se hace `preventDefault`: si esto falla, la descarga ocurre igual. Contar
  * es secundario; entregar el PDF, no.
@@ -83,8 +169,8 @@ function alDescargar() {
 
 const title = computed(() => `CV — ${identity.name}`)
 const description = computed(() => t({
-  es: 'CV de Diego Portilla en tres versiones: pública, anónima e interna. Se genera desde una única fuente de datos y los años se calculan solos.',
-  en: 'Diego Portilla’s CV in three versions: public, anonymous and internal. Generated from a single source of data, with self-computing years.',
+  es: 'CV de Diego Portilla: una sola fuente de datos de la que salen la página y el PDF, con los años calculados desde las fechas y ninguna cifra escrita a mano.',
+  en: 'Diego Portilla’s CV: one source of data behind both the page and the PDF, with years computed from the dates and no hand-written figures.',
 }))
 
 useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
@@ -94,31 +180,39 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
   <div class="cvp">
     <section class="cvp__intro">
       <div class="shell">
-        <p class="eyebrow">
+        <!-- El epígrafe es también el pestillo: diez clics seguidos abren el
+             modal de la contraseña. No es un botón a propósito —no se anuncia,
+             no se tabula, no invita a nadie—: es un atajo para mí. -->
+        <p class="eyebrow cvp__eyebrow" @click="tocarEpigrafe">
           {{ t({ es: 'Currículum', en: 'Résumé' }) }}
         </p>
         <h1 class="cvp__title serif">
-          {{ t({ es: 'Un CV, tres lectores', en: 'One CV, three readers' }) }}
+          {{ t({ es: 'Un CV, una sola fuente', en: 'One CV, one source' }) }}
         </h1>
         <p class="cvp__lede">
           {{ t({
-            es: 'Tenía seis documentos en una carpeta con fechas y verdades ligeramente distintas. Ahora hay una sola fuente de datos y tres formas de leerla, según quién esté al otro lado.',
-            en: 'I had six documents in a folder with different dates and slightly different truths. Now there is one source of data and three ways of reading it, depending on who is on the other side.',
+            es: 'Tenía seis documentos en una carpeta con fechas y verdades ligeramente distintas. Ahora hay una sola fuente de datos: los años se calculan desde ella, la página de abajo se pinta con ella y el PDF sale de esa misma página. No pueden discrepar.',
+            en: 'I had six documents in a folder with different dates and slightly different truths. Now there is one source of data: the years are computed from it, the page below is drawn from it, and the PDF comes off that same page. They cannot disagree.',
           }) }}
         </p>
 
-        <div class="cvp__switch" role="tablist" :aria-label="t({ es: 'Versión del CV', en: 'CV version' })">
-          <button
-            v-for="variant in variants"
-            :key="variant.id"
-            role="tab"
-            type="button"
-            class="cvp__tab"
-            :class="{ 'is-active': variant.id === active }"
-            :aria-selected="variant.id === active"
-            @click="select(variant.id)"
-          >
-            {{ variant.label }}
+        <div v-if="desbloqueado" class="cvp__switch-row">
+          <div class="cvp__switch" role="tablist" :aria-label="t({ es: 'Versión del CV', en: 'CV version' })">
+            <button
+              v-for="variant in visibles"
+              :key="variant.id"
+              role="tab"
+              type="button"
+              class="cvp__tab"
+              :class="{ 'is-active': variant.id === active }"
+              :aria-selected="variant.id === active"
+              @click="select(variant.id)"
+            >
+              {{ variant.label }}
+            </button>
+          </div>
+          <button type="button" class="cvp__lock mono" @click="bloquear">
+            {{ t({ es: 'Cerrar', en: 'Lock' }) }}
           </button>
         </div>
 
@@ -126,10 +220,15 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
           <p class="cvp__blurb">
             {{ activeMeta.blurb }}
           </p>
+          <!-- La pública lleva `download` porque es un fichero estático y nada
+               más va a decir cómo se llama. Las privadas no: las sirve el Worker
+               con `Content-Disposition`, y sin `download` un pase caducado
+               enseña la página de error en vez de guardar el 404 como si fuera
+               un PDF. -->
           <a
             class="cvp__dl"
-            :href="`/cv/${activeMeta.file}`"
-            :download="activeMeta.file"
+            :href="urlCv(active, locale)"
+            :download="esPrivada(active) ? undefined : fichero"
             @click="alDescargar"
           >
             <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -151,8 +250,8 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
 
         <p class="cvp__note mono">
           {{ t({
-            es: 'Ni la web ni los PDF llevan teléfono: un número en una página abierta lo recogen los rastreadores en días y no hay forma de retirarlo. Para un canal directo, el correo. Los nombres de cliente solo aparecen en la versión interna.',
-            en: 'Neither the site nor the PDFs carry a phone number: one printed on an open page is scraped within days and cannot be taken back. For a direct line, the email. Client names only appear in the internal version.',
+            es: 'Ni la web ni los PDF llevan teléfono: un número en una página abierta lo recogen los rastreadores en días y no hay forma de retirarlo. Para un canal directo, el correo. Los clientes salen por sector y nunca por nombre.',
+            en: 'Neither the site nor the PDFs carry a phone number: one printed on an open page is scraped within days and cannot be taken back. For a direct line, the email. Clients appear by sector and never by name.',
           }) }}
           <NuxtLink :to="localePath('/privacidad')">
             {{ t({ es: 'De las descargas solo cuento cuántas y de cuál.', en: 'Of downloads I count only how many, and of which.' }) }}
@@ -160,6 +259,8 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
         </p>
       </div>
     </section>
+
+    <UiCvUnlock v-model="pidiendoClave" @desbloqueado="alDesbloquear" />
   </div>
 </template>
 
@@ -167,6 +268,14 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
 .cvp__intro {
   padding-block: clamp(3.5rem, 2.5rem + 5vw, 6.5rem) clamp(2rem, 1.5rem + 2vw, 3rem);
   background: radial-gradient(90% 130% at 12% 0%, var(--accent-glow), transparent 55%);
+}
+
+/* Ni cursor de mano ni selección de texto: diez clics seguidos sobre una palabra
+   la dejarían resaltada de azul, y eso sí delataría que ahí pasa algo. */
+.cvp__eyebrow {
+  width: fit-content;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .cvp__title { font-size: var(--step-6); margin-top: 1.2rem; }
@@ -179,11 +288,18 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
   color: var(--fg-dim);
 }
 
+.cvp__switch-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 2.5rem;
+}
+
 .cvp__switch {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-top: 2.5rem;
   padding: 0.35rem;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -206,6 +322,19 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
   background: var(--accent);
   color: var(--accent-ink);
 }
+
+.cvp__lock {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.cvp__lock:hover { border-color: var(--accent); color: var(--accent); }
 
 .cvp__meta {
   display: flex;

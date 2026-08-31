@@ -8,6 +8,7 @@
 | Dominio `krahegwen.com` | ✅ hecho |
 | Avisos del formulario | ⏳ falta el bot de Telegram — [paso 2](#2-avisos-por-telegram) |
 | Analítica | ⏳ falta el token, **y va en el build** — [paso 4](#4-analítica) |
+| CV anónimo e interno | ⏳ falta la contraseña — [paso 5](#5-la-contraseña-de-los-cv-no-públicos) |
 | `www.krahegwen.com` | ⚠️ no existe — opcional, ver abajo |
 
 Medido sobre el dominio real: TTFB 80-95 ms y 205 KB en la primera carga,
@@ -120,6 +121,74 @@ de consentimiento. Está explicado en `/privacidad` y hay tests que lo vigilan: 
 algún día añades algo que sí ponga cookies, esos tests fallan y toca revisar el
 documento **antes** de desplegar.
 
+## 5. La contraseña de los CV no públicos
+
+`/cv` publica **un** CV, el público. La versión anónima y la interna de Accenture
+se abren con diez clics seguidos en el epígrafe «Currículum» y una contraseña:
+
+```bash
+npx wrangler secret put CV_CLAVE
+```
+
+Hasta que exista ese secreto el modal responde que no hay clave configurada —no
+que la tecleada sea incorrecta— y los cuatro PDF privados no se descargan.
+
+Que sea **larga**. El límite de dos intentos por media hora vive en la memoria de
+cada instancia del Worker, igual que el del formulario: frena una ráfaga desde
+una misma conexión, no un ataque repartido entre varias. Lo que de verdad protege
+esto es la longitud de la clave. Si algún día hiciera falta un límite de verdad,
+el sitio para ponerlo es KV o un Durable Object.
+
+En local, para probarlo con `pnpm preview`, el secreto va en `.dev.vars` (que
+está en `.gitignore`):
+
+```
+CV_CLAVE=lo-que-sea-para-probar
+```
+
+### Cerrar un pase ya abierto
+
+El pase dura **treinta días** (`VIGENCIA_MS` en `server/utils/pase.ts`). Es largo
+a propósito: lo que hay detrás son dos CV tuyos, y una contraseña que hay que
+teclear cada día acaba apuntada en algún sitio. Para cerrarlo antes hay dos
+formas, según lo que quieras cerrar:
+
+- **Solo este navegador** — el botón «Cerrar» que sale junto al conmutador. Borra
+  la cookie en el servidor, no solo el recuerdo local.
+- **Todos los pases abiertos, en cualquier parte** — cambiar el secreto:
+
+```bash
+npx wrangler secret put CV_CLAVE
+```
+
+La firma de la cookie se deriva de `CV_CLAVE`, así que rotarlo invalida de golpe
+todo lo que hubiera vivo. No hace falta redesplegar: el Worker lee el secreto en
+cada petición.
+
+### Las dos piezas que lo sostienen, y que no son obvias
+
+- **Los PDF privados no están en `public/`**, sino en `server/assets/cv/`, y por
+  tanto viajan dentro del propio Worker (unos 850 KB comprimidos de los 1,1 MB
+  que ocupa). No es manía de orden: en el preset de Cloudflare, todo lo que está
+  en `public/` lo sirve el servidor de activos **antes** de que Nitro mire la
+  petición. Un PDF ahí dentro no se puede proteger por mucha ruta con cookie que
+  exista, porque nadie llegaría a esa ruta. Hay un test que lo vigila.
+- **`run_worker_first` en `wrangler.jsonc` es la lista completa, no un añadido.**
+  Sin ella, todo lo que no encaja con un fichero cae al Worker por defecto; en
+  cuanto existe, lo que no esté dentro lo resuelve el servidor de activos y ya
+  está. La primera versión de esa lista dejó `/api/*` fuera y el formulario de
+  contacto empezó a recibir un 405 del servidor de activos sin que el Worker se
+  enterara siquiera. Si añades una ruta de servidor nueva, tiene que entrar ahí.
+
+### Qué queda fuera del candado
+
+La página se pinta en el navegador, así que **los datos del CV —incluidos los
+nombres de cliente— siguen viajando en el bundle de JavaScript**, igual que antes
+de todo esto. El candado cierra los PDF y las hojas de impresión; no convierte en
+secreto un dato que ya estaba publicado. Para eso habría que sacar esos campos de
+`content/profile.ts` a un módulo que solo importe el servidor y servirlos por
+API tras la cookie — más trabajo, y un cambio de arquitectura, no un parche.
+
 ## Después
 
 - **Google Search Console**: añadir la propiedad y enviar
@@ -153,4 +222,6 @@ pnpm test && pnpm build && pnpm cv:pdf && pnpm og && pnpm deploy
 ```
 
 Los PDF y las tarjetas van versionados porque el runner de build no tiene Chrome
-para generarlos; por eso se hacen en local.
+para generarlos; por eso se hacen en local. `pnpm cv:pdf` deja los dos públicos
+en `public/cv/`, los cuatro privados en `server/assets/cv/` y una copia de los
+seis en `CV/2026/`.

@@ -51,6 +51,9 @@ export default defineNuxtConfig({
     // Una función serverless no se puede prerrenderizar, y sin esta regla el
     // build lo intenta y falla.
     '/api/**': { prerender: false },
+    // Los CV privados tampoco: no son ficheros de `public/`, los sirve una ruta
+    // del Worker que antes pide la cookie del pase.
+    '/cv/privado/**': { prerender: false },
   },
 
   app: {

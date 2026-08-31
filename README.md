@@ -33,6 +33,14 @@ cliente —decían "one of the biggest petrochemical companies"—; solo el deck
 interno lo hacía. Esa línea se respeta y la vigila un test
 (`tests/cv-variants.spec.ts`), porque es la que puede hacer daño de verdad.
 
+**La web publica una de las tres**, la pública. Ofrecer las otras dos a cualquiera
+que pase quedaba raro: una es un CV sin nombre en una página firmada con nombre y
+la otra nombra clientes. Siguen ahí, detrás de diez clics seguidos en el epígrafe
+«Currículum» y una contraseña que se comprueba en el servidor; al acertar, una
+cookie de treinta días abre sus PDF y sus hojas de impresión. El montaje está en
+[DESPLIEGUE.md](DESPLIEGUE.md#5-la-contraseña-de-los-cv-no-públicos), incluido lo
+que **no** tapa.
+
 **Ninguna cifra de años está escrita a mano.** Salen de las fechas del CV
 (`app/utils/dates.ts`), así que la web, las tarjetas sociales y los seis PDF
 envejecen solos y a la vez.
@@ -72,7 +80,12 @@ app/
   layouts/      default (con cabecera) y print (para los PDF)
   utils/        dates.ts — toda la aritmética del CV
 scripts/        generación de PDF y de tarjetas sociales con Chrome headless
-server/routes/  sitemap.xml
+server/
+  api/          contacto, aviso de descarga y el pase de los CV no públicos
+  routes/       sitemap.xml y la descarga privada, previa cookie
+  middleware/   cierra las hojas de impresión que no son públicas
+  utils/        notificar.ts (Telegram) y pase.ts (la cookie)
+  assets/cv/    los cuatro PDF que no son públicos, fuera del alcance web
 ```
 
 ### Idiomas
@@ -119,9 +132,16 @@ seis versiones no genere seis correos.
 
 ### Privacidad
 
-**No hay cookies.** Ni propias ni de terceros, y por eso no hay banner: un aviso
-de cookies en una web sin cookies es ruido que se firma sin leer. Lo único que
-se guarda en el navegador es `kw-theme`, con `light` o `dark`.
+**Quien lee la web no lleva ninguna cookie.** Ni propia ni de terceros, y por eso
+no hay banner: un aviso de cookies en una web sin cookies es ruido que se firma
+sin leer. Lo que se guarda en el navegador es `kw-theme`, con `light` o `dark`.
+
+Hay exactamente una excepción y está contada en la política: al desbloquear los
+CV no públicos con la contraseña, el servidor deja `cv_pase`, que caduca a las
+treinta días y contiene una fecha y su firma —nada de quién—. No pide
+consentimiento porque es estrictamente necesaria para algo que se solicita
+tecleando una contraseña. Los tests ya no vigilan que no haya cookies, sino que
+no aparezca una **segunda**.
 
 Las tipografías **están autoalojadas** (`public/fonts/`, 392 KB). Cargarlas desde
 Google Fonts, que es lo normal, habría enviado la IP de cada visitante a Google
@@ -158,16 +178,18 @@ igual. `scripts/chrome.mjs` localiza el binario; `CHROME_PATH` lo fuerza.
 
 Los PDF salen de las rutas `/print/cv/:variante` y `/en/print/cv/:variante` de la
 propia web —la misma `CvDocument.vue` que se ve en pantalla—, así que **no pueden
-discrepar del sitio**. Se sirven desde `public/cv/` y se copian a `CV/2026/`.
+discrepar del sitio**. El público se sirve desde `public/cv/`; los otros cuatro
+desde `server/assets/cv/`, empaquetados en el Worker y solo accesibles con la
+cookie del pase. Los seis se copian a `CV/2026/`.
 
 El árbol inglés cuelga de `/en/print` y no de `/print/en` porque el idioma se
 deduce del prefijo `/en` de la ruta: con la otra forma los tres PDF marcados EN
 se generaban en español sin que nada fallara. El script lo comprueba antes de
 imprimir cada hoja.
 
-Los artefactos (`public/cv/*.pdf`, `public/og*.png`) **están versionados a
-propósito**: el runner de build no tiene Chrome, así que se generan en local y
-se suben.
+Los artefactos (`public/cv/*.pdf`, `server/assets/cv/*.pdf`, `public/og*.png`)
+**están versionados a propósito**: el runner de build no tiene Chrome, así que se
+generan en local y se suben.
 Tras cambiar `content/profile.ts`:
 
 ```bash
@@ -185,18 +207,26 @@ Viven en local y **no están en el repo** (`tests/` y `vitest.config.ts` están 
 `devDependencies` sí están versionadas, así que `pnpm test` funcionará sin tocar
 nada más.
 
-Son 68 y cubren cuatro cosas: la aritmética de fechas, la coherencia del
+Son 100 y cubren cinco cosas: la aritmética de fechas, la coherencia del
 contenido (fechas sin huecos ni solapes, slugs únicos, traducciones sin
 olvidos), la paridad de los dos árboles de rutas, y las dos que de verdad
 importan — que los nombres de cliente no se escapen de la variante interna, y
 que la política de privacidad siga siendo cierta.
 
+La quinta es la puerta de los CV no públicos, y vigila cosas que ni el build ni
+el linter detectan: que esos cuatro PDF sigan fuera de `public/`, que la ruta que
+los sirve siga pidiendo la cookie, y que `run_worker_first` siga listando todo lo
+que tiene que llegar al Worker.
+
 ## Despliegue
 
 **Cloudflare Workers** (preset `cloudflare_module`). Las 27 páginas se
-prerrenderizan y las sirve Static Assets sin invocar el Worker; lo único que se
-ejecuta son `/api/contacto` y `/api/descarga`. `wrangler.jsonc` tiene la
-configuración y `public/_headers` las cabeceras de seguridad.
+prerrenderizan y las sirve Static Assets sin invocar el Worker. Al Worker solo
+llegan `/api/*`, la descarga de los CV privados y las cuatro hojas de impresión
+que no son públicas — y llegan porque `run_worker_first` las nombra en
+`wrangler.jsonc`. Ojo con esa lista: **en cuanto existe, es la lista completa**, y
+lo que no esté en ella lo resuelve el servidor de activos aunque tenga una ruta de
+servidor detrás. `public/_headers` tiene las cabeceras de seguridad.
 
 Un detalle que costó encontrar: Static Assets redirige `/cv` a `/cv/` por
 defecto, y eso contradice el `canonical`, los `hreflang` y el sitemap, que

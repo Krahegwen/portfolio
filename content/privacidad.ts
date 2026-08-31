@@ -8,9 +8,10 @@ import type { I18nText } from './profile'
  * se cuenta aquí —un servicio nuevo, otro canal de aviso— **este fichero se
  * actualiza en el mismo commit**: una política que miente es peor que no tenerla.
  *
- * Estado a 2026-08-21, verificado contra el código:
- *   · Ninguna cookie. Ni propia ni de terceros.
- *   · localStorage: solo la clave `kw-theme` (claro/oscuro).
+ * Estado a 2026-08-31, verificado contra el código:
+ *   · Ninguna cookie para quien solo lee. Una, `cv_pase` (30 días), si se
+ *     desbloquean las versiones no públicas del CV. Ninguna de terceros.
+ *   · localStorage: `kw-theme` (claro/oscuro) y, tras ese desbloqueo, `kw-cv`.
  *   · Fuentes autoalojadas: no hay petición a Google.
  *   · Cloudflare Web Analytics: sin cookies ni identificador persistente.
  *   · Formulario: nombre, correo y mensaje, con consentimiento expreso. El aviso
@@ -26,7 +27,7 @@ export interface Bloque {
   lista?: I18nText[]
 }
 
-export const actualizado = '2026-08-21'
+export const actualizado = '2026-08-31'
 
 export const intro: I18nText = {
   es: 'Esta es una web personal. No vende nada, no tiene usuarios registrados y no vive de la publicidad, así que recoge muy poco. Lo que recoge está aquí, en el mismo orden en que ocurre.',
@@ -46,15 +47,19 @@ export const bloques: Bloque[] = [
   },
   {
     id: 'cookies',
-    titulo: { es: 'Cookies: no hay', en: 'Cookies: there are none' },
+    titulo: { es: 'Cookies: ninguna, salvo una', en: 'Cookies: none, except one' },
     parrafos: [
       {
-        es: 'Ni propias ni de terceros. Por eso no verás un banner pidiéndote permiso: un aviso de cookies en una web sin cookies es ruido que se firma sin leer y que enseña a firmar sin leer los que sí importan.',
-        en: 'None of my own, none from third parties. That is why you will not see a banner asking for permission: a cookie notice on a site with no cookies is noise that gets clicked through without reading, and it teaches people to click through the ones that do matter.',
+        es: 'Si estás leyendo esta web, no llevas ninguna. Ni propia ni de terceros. Por eso no verás un banner pidiéndote permiso: un aviso de cookies en una web sin cookies es ruido que se firma sin leer y que enseña a firmar sin leer los que sí importan.',
+        en: 'If you are reading this site, you are carrying none. None of my own, none from third parties. That is why you will not see a banner asking for permission: a cookie notice on a site with no cookies is noise that gets clicked through without reading, and it teaches people to click through the ones that do matter.',
       },
       {
-        es: 'Lo único que esta web guarda en tu navegador es una clave llamada `kw-theme` con el valor `light` o `dark`, para recordar si elegiste el tema claro. No se envía a ningún sitio, no identifica a nadie y desaparece si borras los datos del navegador.',
-        en: 'The only thing this site stores in your browser is a key called `kw-theme` holding `light` or `dark`, so it remembers whether you picked the light theme. It is never sent anywhere, it identifies nobody, and it disappears if you clear your browser data.',
+        es: 'La excepción no te afecta, y la cuento igual, porque una política que se calla lo incómodo no sirve para nada. La página del CV publica una sola versión, la pública; las otras dos —una anónima y una interna— se abren tecleando una contraseña que solo tengo yo, y al acertar el servidor deja una cookie llamada `cv_pase` que caduca a los treinta días. Dentro hay una fecha y su firma, nada más: no dice quién, no mide y no viaja a ningún tercero. No pide consentimiento porque es estrictamente necesaria para una función que se solicita de forma expresa —escribiendo esa contraseña— y sin eso no ocurre. Para que nadie pruebe contraseñas a lo bruto, el servidor cuenta los intentos de una misma conexión con la misma huella criptográfica que usa el formulario, y solo mientras dura esa media hora.',
+        en: 'The exception does not affect you, and I am telling you anyway, because a policy that stays quiet about the awkward part is worth nothing. The CV page publishes a single version, the public one; the other two — an anonymous one and an internal one — open by typing a password only I have, and on success the server leaves a cookie called `cv_pase` that expires after thirty days. Inside there is a date and its signature, nothing else: it says nothing about who, it measures nothing, and it travels to no third party. It asks for no consent because it is strictly necessary for a feature that is expressly requested — by typing that password — and without that it never happens. So that nobody tries passwords in bulk, the server counts attempts from the same connection using the same cryptographic fingerprint as the form, and only for as long as that half hour lasts.',
+      },
+      {
+        es: 'Lo único que esta web guarda en tu navegador es una clave llamada `kw-theme` con el valor `light` o `dark`, para recordar si elegiste el tema claro. No se envía a ningún sitio, no identifica a nadie y desaparece si borras los datos del navegador. Si algún día desbloqueas las versiones no públicas del CV se le suma `kw-cv`, que solo apunta cuándo caduca ese desbloqueo.',
+        en: 'The only thing this site stores in your browser is a key called `kw-theme` holding `light` or `dark`, so it remembers whether you picked the light theme. It is never sent anywhere, it identifies nobody, and it disappears if you clear your browser data. If you ever unlock the non-public versions of the CV, `kw-cv` joins it, and all it notes is when that unlock expires.',
       },
     ],
   },

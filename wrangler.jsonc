@@ -9,9 +9,10 @@
   "compatibility_flags": ["nodejs_compat"],
 
   /*
-   * Las 27 páginas prerrenderizadas, los PDF, las tipografías y las tarjetas
-   * sociales se sirven como activos estáticos, sin invocar el Worker. Solo
-   * llegan a él `/api/contacto` y `/api/descarga`.
+   * Las 27 páginas prerrenderizadas, los PDF públicos, las tipografías y las
+   * tarjetas sociales se sirven como activos estáticos, sin invocar el Worker.
+   * Llegan a él `/api/*`, la descarga de los CV privados y sus hojas de
+   * impresión.
    */
   "assets": {
     "directory": ".output/public",
@@ -30,15 +31,41 @@
 
     // Las rutas que no existen reciben la página de error prerenderizada, no el
     // 404 pelado de Cloudflare.
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+
+    /*
+     * Lo que tiene que ver el Worker **antes** que el servidor de activos.
+     *
+     * Las hojas de impresión de los CV no públicos están prerrenderizadas y
+     * viven en `.output/public`: sin esta lista, Cloudflare las serviría tal
+     * cual y el middleware que pide la cookie no llegaría a ejecutarse nunca.
+     *
+     * **Cuidado con esta lista: en cuanto existe, deja de ser un añadido y pasa
+     * a ser la lista completa.** Sin ella, todo lo que no encaja con un fichero
+     * cae al Worker por defecto; con ella, lo que no esté aquí lo resuelve el
+     * servidor de activos y punto — un `POST /api/contacto` recibía un 405 del
+     * servidor de activos y el Worker ni se enteraba. De ahí que `/api/*` esté
+     * en la lista aunque nunca haya sido un fichero.
+     *
+     * `server/middleware/cv-privado.ts` y `tests/cv-pase.spec.ts` dan por hecho
+     * que esto está aquí, y el segundo comprueba que `/api/*` no se cae.
+     */
+    "run_worker_first": [
+      "/api/*",
+      "/cv/privado/*",
+      "/print/cv/anon*",
+      "/print/cv/accenture*",
+      "/en/print/cv/anon*",
+      "/en/print/cv/accenture*"
+    ]
   },
 
   /*
    * Los avisos salen por Telegram. El envío de correo desde un Worker exige
    * plan Workers Paid, y esto es una web personal.
    *
-   * `TELEGRAM_TOKEN` **no está aquí**: es un secreto y va por
-   * `wrangler secret put TELEGRAM_TOKEN`. Este fichero se versiona.
+   * `TELEGRAM_TOKEN` y `CV_CLAVE` **no están aquí**: son secretos y van por
+   * `wrangler secret put`. Este fichero se versiona.
    */
   "vars": {
     // El id del chat no es un secreto: sin el token no sirve de nada.

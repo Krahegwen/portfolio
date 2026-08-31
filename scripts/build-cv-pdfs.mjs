@@ -14,8 +14,14 @@ import { serveStatic } from './serve-static.mjs'
  *
  *   pnpm build && pnpm cv:pdf
  *
- * Salen a `public/cv/` (los sirve la web) y se copian a `CV/2026/` (la carpeta
- * de trabajo, junto a los originales de 2022-2023).
+ * El público sale a `public/cv/`, que sirve Cloudflare como activo estático. Los
+ * otros dos a `server/assets/cv/`, **fuera de `public/`**: ahí dentro los
+ * serviría el servidor de activos sin pasar por el Worker y no habría dónde
+ * pedirles la cookie del pase. Desde `server/assets/` viajan empaquetados dentro
+ * del Worker y solo salen por `/cv/privado/:archivo`.
+ *
+ * Los seis se copian además a `CV/2026/`, la carpeta de trabajo, junto a los
+ * originales de 2022-2023.
  */
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -24,9 +30,9 @@ const PORT = Number(process.env.PDF_PORT ?? 4173)
 const BASE = `http://127.0.0.1:${PORT}`
 
 const VARIANTS = [
-  { id: 'recruiter', suffix: '' },
-  { id: 'anon', suffix: '-Anon' },
-  { id: 'accenture', suffix: '-Accenture' },
+  { id: 'recruiter', suffix: '', dir: 'public/cv' },
+  { id: 'anon', suffix: '-Anon', dir: 'server/assets/cv' },
+  { id: 'accenture', suffix: '-Accenture', dir: 'server/assets/cv' },
 ]
 
 /**
@@ -41,7 +47,7 @@ const LOCALES = [
   { id: 'en', path: '/en/print/cv', tag: 'EN', expect: '>Profile<', reject: '>Perfil<' },
 ]
 
-const outDirs = [join(root, 'public/cv'), join(root, 'CV/2026')]
+const outDirs = [join(root, 'public/cv'), join(root, 'server/assets/cv'), join(root, 'CV/2026')]
 outDirs.forEach(dir => mkdirSync(dir, { recursive: true }))
 
 const STATIC = join(root, '.output/public')
@@ -60,7 +66,7 @@ try {
   for (const locale of LOCALES) {
     for (const variant of VARIANTS) {
       const name = `Diego-Portilla-CV${variant.suffix}-${locale.tag}.pdf`
-      const target = join(root, 'public/cv', name)
+      const target = join(root, variant.dir, name)
       const source = `${BASE}${locale.path}/${variant.id}`
 
       const html = await (await fetch(source)).text()
@@ -88,7 +94,9 @@ try {
     }
   }
 
-  console.log(`\n${readdirSync(join(root, 'public/cv')).length} PDF en public/cv/ y en CV/2026/`)
+  const publicos = readdirSync(join(root, 'public/cv')).length
+  const privados = readdirSync(join(root, 'server/assets/cv')).length
+  console.log(`\n${publicos} PDF en public/cv/, ${privados} en server/assets/cv/, y los ${publicos + privados} en CV/2026/`)
 }
 finally {
   server.close()

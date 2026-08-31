@@ -19,6 +19,8 @@
   Cache-Control: public, max-age=31536000, immutable
 
 # Los PDF sí cambian con el mismo nombre cada vez que se regenera el CV, así que
-# una hora y a revalidar.
+# una hora y a revalidar. Aquí solo caen los dos públicos: los otros cuatro no son
+# activos estáticos —los sirve el Worker tras comprobar la cookie del pase— y sus
+# cabeceras las pone esa ruta, con `private, no-store`.
 /cv/*
   Cache-Control: public, max-age=3600, must-revalidate

@@ -16,6 +16,11 @@ node_modules
 .env.*
 !.env.example
 
+# Los secretos que lee `wrangler dev` en local (CV_CLAVE, TELEGRAM_TOKEN).
+# En producción viven en `wrangler secret put`, no en un fichero.
+.dev.vars
+.dev.vars.*
+
 # Editor / SO
 .DS_Store
 .idea
