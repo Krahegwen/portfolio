@@ -17,7 +17,11 @@ export interface Metric { label: I18nText, value: string }
 
 export interface Project {
   slug: string
-  name: string
+  /**
+   * Título de escaparate: una descripción, nunca el nombre literal del repo o
+   * del producto. El nombre propio, si aporta algo, abre la tagline.
+   */
+  name: I18nText
   year: string
   /** `live` sirve tráfico ahora; `active` se desarrolla; `archived` es historia. */
   status: 'live' | 'active' | 'archived'
@@ -37,7 +41,7 @@ export interface Project {
 export const projects: Project[] = [
   {
     slug: 'coffee-data',
-    name: 'Registro de café',
+    name: { es: 'Registro de café', en: 'Coffee log' },
     year: '2026',
     status: 'live',
     visibility: 'public',
@@ -72,7 +76,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'photo-editor',
-    name: 'photo-editor',
+    name: { es: 'Editor de fotografías', en: 'Photo editor' },
     year: '2026',
     status: 'active',
     visibility: 'public',
@@ -106,15 +110,15 @@ export const projects: Project[] = [
   },
   {
     slug: 'crono-and-co',
-    name: 'Crono&Co',
+    name: { es: 'Tienda de relojes', en: 'Watch store' },
     year: '2026',
     status: 'active',
     visibility: 'private',
     featured: true,
     hue: 28,
     tagline: {
-      es: 'Tienda de relojes con Nuxt 4 y Medusa, de la migración al despliegue',
-      en: 'A watch store on Nuxt 4 and Medusa, from migration to deploy',
+      es: 'Crono&Co: Nuxt 4 y Medusa, de la migración al despliegue',
+      en: 'Crono&Co: Nuxt 4 and Medusa, from migration to deploy',
     },
     summary: {
       es: 'Un e-commerce completo: escaparate en Nuxt 4 con SSR sobre Vercel y un backend headless Medusa 2.0 en un VPS, con Postgres gestionado, Redis y CI propio.',
@@ -140,15 +144,15 @@ export const projects: Project[] = [
   },
   {
     slug: 'tcg-life-counter',
-    name: 'TCG Life Counter',
+    name: { es: 'Contador de vidas', en: 'Life counter' },
     year: '2026',
     status: 'live',
     visibility: 'private',
     featured: true,
     hue: 265,
     tagline: {
-      es: 'Contador de vidas multi-TCG, PWA offline-first',
-      en: 'A multi-TCG life counter, offline-first PWA',
+      es: 'TCG Life Counter: PWA offline-first para Magic y más',
+      en: 'TCG Life Counter: an offline-first PWA for Magic and more',
     },
     summary: {
       es: 'Magic (Standard y Commander) de 2 a 6 jugadores, con matriz de daño de comandante, deshacer, Wake Lock y tema AMOLED. Instalable y sin red.',
@@ -174,15 +178,15 @@ export const projects: Project[] = [
   },
   {
     slug: 'tws-tools',
-    name: 'TWS-Tools',
+    name: { es: 'Sistemas de trading', en: 'Trading systems' },
     year: '2026',
     status: 'live',
     visibility: 'private',
     featured: false,
     hue: 8,
     tagline: {
-      es: 'Dos sistemas de trading algorítmico sobre IBKR, en producción',
-      en: 'Two algorithmic trading systems over IBKR, in production',
+      es: 'TWS-Tools: dos sistemas algorítmicos sobre IBKR, en producción',
+      en: 'TWS-Tools: two algorithmic systems over IBKR, in production',
     },
     summary: {
       es: 'Un motor de scalping EMA en vivo y un port de la estrategia NostalgiaForInfinity a renta variable, con supervisor, backtesting de cartera y una suite de tests que sostiene el conjunto.',
@@ -207,7 +211,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'krahegwen-com',
-    name: 'krahegwen.com',
+    name: { es: 'Mi porfolio', en: 'My portfolio' },
     year: '2026',
     status: 'live',
     visibility: 'public',
@@ -233,7 +237,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'corta-fruta-vr',
-    name: 'Corta Fruta VR',
+    name: { es: 'Corta Fruta VR', en: 'Corta Fruta VR' },
     year: '2018',
     status: 'archived',
     visibility: 'private',

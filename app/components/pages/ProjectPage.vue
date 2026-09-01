@@ -36,7 +36,7 @@ onMounted(() => {
   track(parallax(scope.querySelector('.pd__glow'), 0.3, scope))
 })
 
-const title = computed(() => `${project.value!.name} — ${identity.name}`)
+const title = computed(() => `${t(project.value!.name)} — ${identity.name}`)
 const description = computed(() => t(project.value!.summary))
 
 useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
@@ -66,7 +66,7 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
         </p>
 
         <h1 data-reveal class="pd__title serif">
-          {{ project.name }}
+          {{ t(project.name) }}
         </h1>
         <p data-reveal class="pd__tagline">
           {{ t(project.tagline) }}
@@ -130,12 +130,12 @@ useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
     <nav class="shell pd__nav" :aria-label="t({ es: 'Otros proyectos', en: 'Other projects' })">
       <NuxtLink v-if="siblings.prev" :to="`${base}/${siblings.prev.slug}`" class="pd__sib">
         <span class="mono">← {{ t({ es: 'anterior', en: 'previous' }) }}</span>
-        <b>{{ siblings.prev.name }}</b>
+        <b>{{ t(siblings.prev.name) }}</b>
       </NuxtLink>
       <span v-else />
       <NuxtLink v-if="siblings.next" :to="`${base}/${siblings.next.slug}`" class="pd__sib pd__sib--next">
         <span class="mono">{{ t({ es: 'siguiente', en: 'next' }) }} →</span>
-        <b>{{ siblings.next.name }}</b>
+        <b>{{ t(siblings.next.name) }}</b>
       </NuxtLink>
     </nav>
   </article>

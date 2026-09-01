@@ -44,7 +44,7 @@ function onLeave() { tilt.x = 0; tilt.y = 0 }
     @pointerleave="onLeave"
   >
     <NuxtLink :to="`${base}/${project.slug}`" class="pc__hit">
-      <span class="visually-hidden">{{ project.name }}</span>
+      <span class="visually-hidden">{{ t(project.name) }}</span>
     </NuxtLink>
 
     <div class="pc__inner">
@@ -59,7 +59,7 @@ function onLeave() { tilt.x = 0; tilt.y = 0 }
       </header>
 
       <h3 class="pc__name serif">
-        {{ project.name }}
+        {{ t(project.name) }}
       </h3>
       <p class="pc__tagline">
         {{ t(project.tagline) }}
