@@ -5,6 +5,10 @@
  * proyecto y su demo, pero no hay enlace al código. Los forks que tengo por
  * tener (Babylon.js, cleave.js, frequi, mpc-autofill…) no salen aquí a
  * propósito: no son míos.
+ *
+ * El orden del array es el orden de escaparate: la portada pinta los `featured`
+ * tal cual vienen aquí, y `/proyectos` los pone delante conservando este mismo
+ * orden. Los cuatro primeros están elegidos y ordenados a mano.
  */
 
 import type { I18nText } from './profile'
@@ -31,73 +35,6 @@ export interface Project {
 }
 
 export const projects: Project[] = [
-  {
-    slug: 'crono-and-co',
-    name: 'Crono&Co',
-    year: '2026',
-    status: 'active',
-    visibility: 'private',
-    featured: true,
-    hue: 28,
-    tagline: {
-      es: 'Tienda de relojes con Nuxt 4 y Medusa, de la migración al despliegue',
-      en: 'A watch store on Nuxt 4 and Medusa, from migration to deploy',
-    },
-    summary: {
-      es: 'Un e-commerce completo: escaparate en Nuxt 4 con SSR sobre Vercel y un backend headless Medusa 2.0 en un VPS, con Postgres gestionado, Redis y CI propio.',
-      en: 'A full e-commerce build: a Nuxt 4 SSR storefront on Vercel over a headless Medusa 2.0 backend on a VPS, with managed Postgres, Redis and its own CI.',
-    },
-    body: [
-      {
-        es: 'Empezó como un Vue 3 plano y se migró a Nuxt 4 para tener SSR de verdad: catálogo indexable, primer render con producto ya pintado y el estado del carrito resuelto en servidor. La parte interesante del proyecto no es la tienda, es la costura entre capas: el contexto de Nuxt se resuelve una vez en el store en lugar de en cada acción, porque en SSR cada acción vive en una petición distinta y resolverlo tarde te da el contexto de otro visitante.',
-        en: 'It started as plain Vue 3 and was migrated to Nuxt 4 for real SSR: an indexable catalogue, a first paint with the product already drawn, and cart state resolved server-side. The interesting part is not the shop, it is the seam between layers: the Nuxt context is resolved once in the store rather than on every action, because under SSR each action lives in a different request and resolving it late hands you another visitor’s context.',
-      },
-      {
-        es: 'La infraestructura está repartida a propósito. El front va en Vercel porque el edge le sale gratis; Medusa va en un VPS porque necesita proceso largo y trabajos en cola; Postgres y Redis son gestionados para no cuidar servidores de estado. Todo cuelga de un `.nvmrc` único que leen los dos jobs del CI, para que CI, Vercel y el VPS no acaben en tres versiones distintas de Node sin que nadie se entere.',
-        en: 'The infrastructure is split on purpose. The front end sits on Vercel because the edge comes free; Medusa runs on a VPS because it needs a long-lived process and queued jobs; Postgres and Redis are managed so nobody babysits stateful servers. Everything hangs off a single `.nvmrc` read by both CI jobs, so CI, Vercel and the VPS do not silently drift into three different Node versions.',
-      },
-    ],
-    stack: ['Nuxt 4', 'Vue 3', 'TypeScript', 'Medusa 2.0', 'PostgreSQL', 'Redis', 'Vercel', 'Cloudflare', 'GitHub Actions'],
-    metrics: [
-      { label: { es: 'commits', en: 'commits' }, value: '420+' },
-      { label: { es: 'capas desplegadas', en: 'deployed tiers' }, value: '4' },
-      { label: { es: 'de Vue 3 a Nuxt 4', en: 'Vue 3 → Nuxt 4' }, value: 'SSR' },
-    ],
-    demo: 'https://watch-store-lemon.vercel.app',
-  },
-  {
-    slug: 'tws-tools',
-    name: 'TWS-Tools',
-    year: '2026',
-    status: 'live',
-    visibility: 'private',
-    featured: true,
-    hue: 8,
-    tagline: {
-      es: 'Dos sistemas de trading algorítmico sobre IBKR, en producción',
-      en: 'Two algorithmic trading systems over IBKR, in production',
-    },
-    summary: {
-      es: 'Un motor de scalping EMA en vivo y un port de la estrategia NostalgiaForInfinity a renta variable, con supervisor, backtesting de cartera y una suite de tests que sostiene el conjunto.',
-      en: 'A live EMA scalping engine plus a port of the NostalgiaForInfinity strategy to equities, with a supervisor, portfolio backtesting, and a test suite holding the whole thing up.',
-    },
-    body: [
-      {
-        es: 'Es el proyecto donde más he aprendido de arquitectura, porque un fallo aquí cuesta dinero de verdad. Cada dato tiene un único dueño: los límites de peticiones de IB viven en un módulo y solo en uno, las rutas de disco salen de `common/paths.py` y ningún módulo las deriva de su propio `__file__`, y la URL de Telegram la construye un solo sitio para los cinco procesos que avisan. Cuando el mismo dato se calcula en dos pantallas, tarde o temprano cuentan cosas distintas.',
-        en: 'This is where I have learned the most about architecture, because a bug here costs real money. Every fact has one owner: IB request pacing lives in exactly one module, disk paths come from `common/paths.py` and no module derives them from its own `__file__`, and the Telegram URL is built in a single place for the five processes that post. When the same fact is computed in two screens, sooner or later they tell different stories.',
-      },
-      {
-        es: 'El supervisor hace relevo en caliente: un `/restart` sale con código 42 y el núcleo lo reemplaza sin perder el hilo, con backoff ante caídas y logs rotados. Hay dos capas de datos separadas —el almacén de velas y el estado de trading— y un gateway de solo lectura con banderas de frescura, para que una estrategia nunca decida sobre una vela vieja creyéndola nueva.',
-        en: 'The supervisor does hot handover: a `/restart` exits with code 42 and the core swaps the process without losing the thread, with crash backoff and rotated logs. There are two separate data layers — the candle store and the trading state — plus a read-only gateway with freshness flags, so a strategy never decides on a stale candle believing it is fresh.',
-      },
-    ],
-    stack: ['Python', 'ib_insync', 'SQLite', 'pandas', 'pytest', 'Telegram Bot API', 'Stream Deck'],
-    metrics: [
-      { label: { es: 'módulos Python', en: 'Python modules' }, value: '450+' },
-      { label: { es: 'suites de test', en: 'test suites' }, value: '82' },
-      { label: { es: 'commits', en: 'commits' }, value: '550+' },
-    ],
-  },
   {
     slug: 'coffee-data',
     name: 'Registro de café',
@@ -134,6 +71,74 @@ export const projects: Project[] = [
     demo: 'https://brew.krahegwen.com',
   },
   {
+    slug: 'photo-editor',
+    name: 'photo-editor',
+    year: '2026',
+    status: 'active',
+    visibility: 'public',
+    featured: true,
+    hue: 320,
+    tagline: {
+      es: 'Editor RAW local: motor FastAPI, interfaz Vue y servidor MCP',
+      en: 'A local RAW editor: FastAPI engine, Vue interface, MCP server',
+    },
+    summary: {
+      es: 'Sustituye a Lightroom en mi flujo real: cribar, puntuar y revelar los ARW de la cámara sin tocar jamás el original. El mismo motor lo operan por igual la interfaz y un agente de IA por MCP.',
+      en: 'Replaces Lightroom in my actual workflow: culling, rating and developing the camera’s ARW files without ever touching the original. The same engine is driven equally by the interface and by an AI agent over MCP.',
+    },
+    body: [
+      {
+        es: 'La regla que ordena todo el diseño es que la verdad vive en el disco: el RAW no se modifica jamás, el rating va en sidecars XMP que Lightroom entiende y una edición es una receta JSON junto a la foto. SQLite es solo un índice que un escaneo reconstruye, y la caché de previews vive fuera del archivo fotográfico, porque esa carpeta se sincroniza con la nube y nada generado debe viajar con ella. Se puede borrar la base de datos entera sin perder ni una estrella.',
+        en: 'The rule that shapes the whole design is that truth lives on disk: the RAW is never modified, ratings go in XMP sidecars Lightroom understands, and an edit is a JSON recipe sitting next to the photo. SQLite is just an index a scan can rebuild, and the preview cache lives outside the photo archive, because that folder syncs to the cloud and nothing generated should travel with it. You can delete the entire database without losing a single star.',
+      },
+      {
+        es: 'Hay un solo motor y dos manos que lo manejan: la interfaz Vue y un servidor MCP exponen las mismas operaciones, así que Claude puede cribar una sesión, puntuarla o exportarla igual que yo desde la pantalla. Construir para un agente obligó a que la API fuera honesta —todo lo que hace la interfaz existe como endpoint— y a fijar el reparto de confianza: los trabajos largos pasan por una cola secuencial compartida y todo borrado es un ensayo salvo confirmación explícita.',
+        en: 'There is one engine and two hands on it: the Vue interface and an MCP server expose the same operations, so Claude can cull a shoot, rate it or export it just as I do from the screen. Building for an agent forced the API to be honest — everything the interface does exists as an endpoint — and forced the trust boundaries: long jobs go through a shared sequential queue, and every deletion is a dry run unless explicitly confirmed.',
+      },
+    ],
+    stack: ['Python', 'FastAPI', 'rawpy', 'SQLite', 'Vue 3', 'Vite', 'MCP'],
+    metrics: [
+      { label: { es: 'tools MCP', en: 'MCP tools' }, value: '15' },
+      { label: { es: 'endpoints', en: 'endpoints' }, value: '19' },
+      { label: { es: 'RAW modificados', en: 'RAWs modified' }, value: '0' },
+    ],
+    repo: 'https://github.com/Krahegwen/photo-editor',
+  },
+  {
+    slug: 'crono-and-co',
+    name: 'Crono&Co',
+    year: '2026',
+    status: 'active',
+    visibility: 'private',
+    featured: true,
+    hue: 28,
+    tagline: {
+      es: 'Tienda de relojes con Nuxt 4 y Medusa, de la migración al despliegue',
+      en: 'A watch store on Nuxt 4 and Medusa, from migration to deploy',
+    },
+    summary: {
+      es: 'Un e-commerce completo: escaparate en Nuxt 4 con SSR sobre Vercel y un backend headless Medusa 2.0 en un VPS, con Postgres gestionado, Redis y CI propio.',
+      en: 'A full e-commerce build: a Nuxt 4 SSR storefront on Vercel over a headless Medusa 2.0 backend on a VPS, with managed Postgres, Redis and its own CI.',
+    },
+    body: [
+      {
+        es: 'Empezó como un Vue 3 plano y se migró a Nuxt 4 para tener SSR de verdad: catálogo indexable, primer render con producto ya pintado y el estado del carrito resuelto en servidor. La parte interesante del proyecto no es la tienda, es la costura entre capas: el contexto de Nuxt se resuelve una vez en el store en lugar de en cada acción, porque en SSR cada acción vive en una petición distinta y resolverlo tarde te da el contexto de otro visitante.',
+        en: 'It started as plain Vue 3 and was migrated to Nuxt 4 for real SSR: an indexable catalogue, a first paint with the product already drawn, and cart state resolved server-side. The interesting part is not the shop, it is the seam between layers: the Nuxt context is resolved once in the store rather than on every action, because under SSR each action lives in a different request and resolving it late hands you another visitor’s context.',
+      },
+      {
+        es: 'La infraestructura está repartida a propósito. El front va en Vercel porque el edge le sale gratis; Medusa va en un VPS porque necesita proceso largo y trabajos en cola; Postgres y Redis son gestionados para no cuidar servidores de estado. Todo cuelga de un `.nvmrc` único que leen los dos jobs del CI, para que CI, Vercel y el VPS no acaben en tres versiones distintas de Node sin que nadie se entere.',
+        en: 'The infrastructure is split on purpose. The front end sits on Vercel because the edge comes free; Medusa runs on a VPS because it needs a long-lived process and queued jobs; Postgres and Redis are managed so nobody babysits stateful servers. Everything hangs off a single `.nvmrc` read by both CI jobs, so CI, Vercel and the VPS do not silently drift into three different Node versions.',
+      },
+    ],
+    stack: ['Nuxt 4', 'Vue 3', 'TypeScript', 'Medusa 2.0', 'PostgreSQL', 'Redis', 'Vercel', 'Cloudflare', 'GitHub Actions'],
+    metrics: [
+      { label: { es: 'commits', en: 'commits' }, value: '420+' },
+      { label: { es: 'capas desplegadas', en: 'deployed tiers' }, value: '4' },
+      { label: { es: 'de Vue 3 a Nuxt 4', en: 'Vue 3 → Nuxt 4' }, value: 'SSR' },
+    ],
+    demo: 'https://watch-store-lemon.vercel.app',
+  },
+  {
     slug: 'tcg-life-counter',
     name: 'TCG Life Counter',
     year: '2026',
@@ -166,6 +171,39 @@ export const projects: Project[] = [
       { label: { es: 'temas', en: 'themes' }, value: '3' },
     ],
     demo: 'https://life.krahegwen.com',
+  },
+  {
+    slug: 'tws-tools',
+    name: 'TWS-Tools',
+    year: '2026',
+    status: 'live',
+    visibility: 'private',
+    featured: false,
+    hue: 8,
+    tagline: {
+      es: 'Dos sistemas de trading algorítmico sobre IBKR, en producción',
+      en: 'Two algorithmic trading systems over IBKR, in production',
+    },
+    summary: {
+      es: 'Un motor de scalping EMA en vivo y un port de la estrategia NostalgiaForInfinity a renta variable, con supervisor, backtesting de cartera y una suite de tests que sostiene el conjunto.',
+      en: 'A live EMA scalping engine plus a port of the NostalgiaForInfinity strategy to equities, with a supervisor, portfolio backtesting, and a test suite holding the whole thing up.',
+    },
+    body: [
+      {
+        es: 'Es el proyecto donde más he aprendido de arquitectura, porque un fallo aquí cuesta dinero de verdad. Cada dato tiene un único dueño: los límites de peticiones de IB viven en un módulo y solo en uno, las rutas de disco salen de `common/paths.py` y ningún módulo las deriva de su propio `__file__`, y la URL de Telegram la construye un solo sitio para los cinco procesos que avisan. Cuando el mismo dato se calcula en dos pantallas, tarde o temprano cuentan cosas distintas.',
+        en: 'This is where I have learned the most about architecture, because a bug here costs real money. Every fact has one owner: IB request pacing lives in exactly one module, disk paths come from `common/paths.py` and no module derives them from its own `__file__`, and the Telegram URL is built in a single place for the five processes that post. When the same fact is computed in two screens, sooner or later they tell different stories.',
+      },
+      {
+        es: 'El supervisor hace relevo en caliente: un `/restart` sale con código 42 y el núcleo lo reemplaza sin perder el hilo, con backoff ante caídas y logs rotados. Hay dos capas de datos separadas —el almacén de velas y el estado de trading— y un gateway de solo lectura con banderas de frescura, para que una estrategia nunca decida sobre una vela vieja creyéndola nueva.',
+        en: 'The supervisor does hot handover: a `/restart` exits with code 42 and the core swaps the process without losing the thread, with crash backoff and rotated logs. There are two separate data layers — the candle store and the trading state — plus a read-only gateway with freshness flags, so a strategy never decides on a stale candle believing it is fresh.',
+      },
+    ],
+    stack: ['Python', 'ib_insync', 'SQLite', 'pandas', 'pytest', 'Telegram Bot API', 'Stream Deck'],
+    metrics: [
+      { label: { es: 'módulos Python', en: 'Python modules' }, value: '450+' },
+      { label: { es: 'suites de test', en: 'test suites' }, value: '82' },
+      { label: { es: 'commits', en: 'commits' }, value: '550+' },
+    ],
   },
   {
     slug: 'krahegwen-com',

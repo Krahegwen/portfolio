@@ -18,8 +18,8 @@ onMounted(() => {
 
 const title = computed(() => `${t({ es: 'Proyectos', en: 'Projects' })} — ${identity.name}`)
 const description = computed(() => t({
-  es: 'Proyectos propios de Diego Portilla: e-commerce con Nuxt 4 y Medusa, dos sistemas de trading en Python, una bitácora de café en Cloudflare Workers y una PWA offline-first.',
-  en: 'Diego Portilla’s own projects: a Nuxt 4 + Medusa storefront, two Python trading systems, a coffee log on Cloudflare Workers and an offline-first PWA.',
+  es: 'Proyectos propios de Diego Portilla: una bitácora de café en Cloudflare Workers, un editor RAW local con servidor MCP, e-commerce con Nuxt 4 y Medusa y una PWA offline-first.',
+  en: 'Diego Portilla’s own projects: a coffee log on Cloudflare Workers, a local RAW editor with an MCP server, a Nuxt 4 + Medusa storefront and an offline-first PWA.',
 }))
 
 useSeoMeta({ title, description, ogTitle: title, ogDescription: description })
