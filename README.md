@@ -59,7 +59,7 @@ pnpm dev
 | `pnpm dev` | Servidor de desarrollo |
 | `pnpm build` | Build de producción a `.output` |
 | `pnpm preview` | Sirve el build con `wrangler dev`, el runtime real |
-| `pnpm deploy` | Despliega a Cloudflare Workers |
+| `pnpm run deploy` | Despliega a Cloudflare Workers. El `run` no sobra: `deploy` es un comando propio de pnpm y se come al script |
 | `pnpm test` | Los tests (ver más abajo) |
 | `pnpm lint` | ESLint |
 | `pnpm cv:pdf` | Regenera los seis PDF del CV. **Necesita `pnpm build` antes** |

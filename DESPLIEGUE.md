@@ -17,13 +17,19 @@ tipografías incluidas.
 ## 1. Desplegar — hecho
 
 ```bash
-pnpm build && pnpm deploy
+pnpm build && pnpm run deploy
 ```
 
-Eso es todo lo que hace falta para publicar un cambio. Si prefieres que despliegue
-solo en cada push, Cloudflare tiene **Workers Builds**: Dashboard → Workers → el
-proyecto → Settings → Builds → conectar `Krahegwen/portfolio`, con `pnpm build` y
-`npx wrangler deploy`.
+Eso es todo lo que hace falta para publicar un cambio.
+
+> **`run` no sobra.** `deploy` es un comando propio de pnpm —el de desplegar un
+> paquete de un monorepo— y se come al script del `package.json`: `pnpm deploy` a
+> secas contesta `ERR_PNPM_NOTHING_TO_DEPLOY` y no llega a llamar a wrangler.
+> `pnpm build` y `pnpm test` no tienen ese problema.
+
+Si prefieres que despliegue solo en cada push, Cloudflare tiene **Workers
+Builds**: Dashboard → Workers → el proyecto → Settings → Builds → conectar
+`Krahegwen/portfolio`, con `pnpm build` y `npx wrangler deploy`.
 
 ### `www`, si lo quieres
 
@@ -61,7 +67,7 @@ curl -s "https://api.telegram.org/bot<TU_TOKEN>/getUpdates" | grep -o '"chat":{"
 npx wrangler secret put TELEGRAM_TOKEN
 ```
 
-5. `pnpm deploy` y prueba el formulario en la web.
+5. `pnpm run deploy` y prueba el formulario en la web.
 
 ### Detalles que ya están resueltos
 
@@ -104,7 +110,7 @@ Si despliegas desde tu máquina, va en el `.env`:
 NUXT_PUBLIC_ANALYTICS_TOKEN=el_token_que_te_dio_cloudflare
 ```
 
-y luego `pnpm build && pnpm deploy`. Compruébalo antes de subir:
+y luego `pnpm build && pnpm run deploy`. Compruébalo antes de subir:
 
 ```bash
 grep -o 'data-cf-beacon' .output/public/index.html
@@ -218,7 +224,7 @@ cuesta más que el spam que hoy no existe.
 `content/profile.ts` es el único fichero que hay que tocar. Después:
 
 ```bash
-pnpm test && pnpm build && pnpm cv:pdf && pnpm og && pnpm deploy
+pnpm test && pnpm build && pnpm cv:pdf && pnpm og && pnpm run deploy
 ```
 
 Los PDF y las tarjetas van versionados porque el runner de build no tiene Chrome
