@@ -9,7 +9,8 @@
 | Avisos del formulario | ✅ hecho — bot `@krahegwen_warnings_bot`, [paso 2](#2-avisos-por-telegram--hecho) |
 | Analítica | ✅ hecha — el token se hornea en el build, [paso 4](#4-analítica--hecha) |
 | CV anónimo e interno | ✅ hecho — `CV_CLAVE` puesta, [paso 5](#5-la-contraseña-de-los-cv-no-públicos) |
-| `www.krahegwen.com` | ⚠️ no existe — opcional, ver abajo |
+| `www.krahegwen.com` | ✅ hecho — mismo sitio, canonical al ápice |
+| `portilla.dev` | 🕓 cuando sea tuyo — [ver abajo](#el-día-que-llegue-portilladev) |
 
 Medido sobre el dominio real: TTFB 80-95 ms y 205 KB en la primera carga,
 tipografías incluidas.
@@ -31,15 +32,53 @@ Si prefieres que despliegue solo en cada push, Cloudflare tiene **Workers
 Builds**: Dashboard → Workers → el proyecto → Settings → Builds → conectar
 `Krahegwen/portfolio`, con `pnpm build` y `npx wrangler deploy`.
 
-### `www`, si lo quieres
+### Los dominios, y dónde se declaran
 
-`www.krahegwen.com` hoy no existe: quien lo teclee recibe un error de DNS del
-navegador en lugar del sitio. No es imprescindible —los `canonical` van todos sin
-`www`— pero cuesta un clic:
+Están en `routes` de `wrangler.jsonc`, no en el dashboard:
 
-Workers → `krahegwen` → Settings → Domains & Routes → Add → Custom Domain →
-`www.krahegwen.com`. Servirá el mismo sitio, y los `canonical` ya le dicen a
-Google cuál es la buena.
+```jsonc
+"routes": [
+  { "pattern": "krahegwen.com", "custom_domain": true },
+  { "pattern": "www.krahegwen.com", "custom_domain": true }
+]
+```
+
+Los dos sirven **el mismo sitio**, sin redirección entre ellos. No hace falta:
+todas las URL que el sitio declara de sí mismo —`canonical`, `hreflang`, sitemap,
+tarjetas sociales, JSON-LD— salen de `identity.site` en `content/profile.ts`, así
+que se entre por donde se entre, la página dice cuál es su dirección buena y
+Google no ve dos copias.
+
+Esa lista es **la lista completa**: lo que no esté ahí, wrangler no lo crea. El
+ápice estuvo dado de alta a mano en el dashboard hasta que se escribió.
+
+> **Escribirla apaga `workers.dev`.** En cuanto existe `routes`, wrangler
+> desactiva por defecto el subdominio `*.workers.dev` y las Preview URLs, y lo
+> dice en un aviso al desplegar. Aquí están puestos a `false` a mano para que sea
+> una decisión y no un aviso: el sitio servido en
+> `krahegwen.diego-portilla-protonmail.workers.dev` era una copia indexable en
+> una dirección que no es de nadie, y las Preview URLs solo salen de
+> `wrangler versions upload`, que no se usa.
+
+### El día que llegue portilla.dev
+
+El plan es que la web pase a `portilla.dev` **manteniendo los dos dominios**. El
+montaje ya está preparado para eso, y son tres pasos:
+
+1. **`content/profile.ts` → `identity.site`.** Es el único sitio donde está
+   escrito el dominio. De ahí salen los `canonical`, los `hreflang`, el sitemap,
+   las tarjetas sociales, el JSON-LD y hasta el pie de los seis PDF del CV.
+   Cambiar esa línea traslada la dirección buena; los tres dominios seguirán
+   sirviendo el sitio y los tres dirán que la versión canónica es la nueva, que
+   es exactamente la señal que Google necesita para mover el índice sin perderlo.
+2. **`routes` en `wrangler.jsonc`**, una línea más. Sin quitar las de
+   `krahegwen.com`: la gracia es que las direcciones viejas sigan funcionando.
+3. **`pnpm build && pnpm cv:pdf && pnpm og && pnpm run deploy`.** Los PDF y las
+   tarjetas llevan el dominio dibujado dentro, así que hay que regenerarlos.
+
+Lo que **no** hay que tocar: nada del código. Si alguna vez aparece un
+`krahegwen.com` escrito a mano fuera de `content/`, es un bug —ya pasó en el pie
+de los CV— y el sitio es esa línea 1, no un buscar y reemplazar.
 
 ## 2. Avisos por Telegram — hecho
 
@@ -141,10 +180,19 @@ NUXT_PUBLIC_ANALYTICS_TOKEN=el_token_que_te_dio_cloudflare
 y luego `pnpm build && pnpm run deploy`. Compruébalo antes de subir:
 
 ```bash
-grep -o 'data-cf-beacon' .output/public/index.html
+grep -rl 'data-cf-beacon' .output/public --include='*.html' | wc -l
 ```
 
-Si no imprime nada, el token no llegó al build y desplegar no serviría de nada.
+Tienen que salir **29**, las 29 páginas prerenderizadas. Si sale 0, el token no
+llegó al build y desplegar no serviría de nada.
+
+> **Por qué el beacon está en `app.head` de `nuxt.config.ts`** y no en un
+> `useHead` de `app.vue`, que es donde parece que va: Nuxt prerenderiza
+> `404.html` como cáscara de cliente (`data-ssr="false"`), y lo que declara un
+> componente no llega a su HTML. Puesto en `app.vue` salía en 28 de 29, y la que
+> faltaba era justo la que ve quien llega de un enlace roto o de un buscador con
+> el índice viejo. Hay un test que ata la decisión, porque moverlo «a su sitio»
+> parece una mejora.
 
 Si algún día lo pasas a **Workers Builds**, la variable va en Settings → Builds →
 Build variables, que sí se leen al compilar — no en Settings → Variables, que son

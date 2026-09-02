@@ -77,6 +77,44 @@
     "AVISAR_DESCARGAS": "si"
   },
 
+  /*
+   * Los dominios que sirve este Worker, **la lista completa**: lo que no esté
+   * aquí, wrangler no lo crea, y el ápice estaba dado de alta a mano desde el
+   * dashboard hasta que se escribió esta lista. Los dos son custom domains, no
+   * rutas: Cloudflare crea el registro DNS y emite el certificado por su cuenta,
+   * que es lo que se gana teniendo el dominio en la misma casa.
+   *
+   * `www` sirve exactamente el mismo sitio. No hay redirección de uno a otro y
+   * no hace falta: todas las URL del sitio —canonical, hreflang, sitemap, og—
+   * salen de `identity.site` en content/profile.ts, así que las dos direcciones
+   * declaran la misma versión buena y Google no ve contenido duplicado.
+   *
+   * Cuando exista portilla.dev entra aquí como una línea más, sin quitar
+   * ninguna: el sitio seguirá sirviéndose en los tres sitios, y quien mande
+   * sobre el canonical seguirá siendo `identity.site`. Ver DESPLIEGUE.md.
+   */
+  "routes": [
+    { "pattern": "krahegwen.com", "custom_domain": true },
+    { "pattern": "www.krahegwen.com", "custom_domain": true }
+  ],
+
+  /*
+   * Los dos en falso **a propósito**, no por descuido: en cuanto existe
+   * `routes`, wrangler los desactiva por defecto y avisa de que lo ha hecho.
+   * Escribirlos es quedarse con la decisión en lugar de con el aviso.
+   *
+   * `workers_dev` servía el sitio entero en
+   * `krahegwen.diego-portilla-protonmail.workers.dev`, una copia indexable en
+   * una dirección que no es de nadie. Los `canonical` ya apuntaban al ápice,
+   * pero no existir es mejor que estar y explicarse.
+   *
+   * Las Preview URLs solo salen de `wrangler versions upload`, y aquí se
+   * despliega derecho a producción. Si algún día hace falta probar una versión
+   * antes de darle tráfico, se pone a `true` y ya está.
+   */
+  "workers_dev": false,
+  "preview_urls": false,
+
   "observability": {
     "enabled": true
   }
