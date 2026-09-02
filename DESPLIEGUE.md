@@ -7,7 +7,7 @@
 | Despliegue en Cloudflare Workers | ✅ hecho |
 | Dominio `krahegwen.com` | ✅ hecho |
 | Avisos del formulario | ✅ hecho — bot `@krahegwen_warnings_bot`, [paso 2](#2-avisos-por-telegram--hecho) |
-| Analítica | ⏳ falta el token, **y va en el build** — [paso 4](#4-analítica) |
+| Analítica | ✅ hecha — el token se hornea en el build, [paso 4](#4-analítica--hecha) |
 | CV anónimo e interno | ✅ hecho — `CV_CLAVE` puesta, [paso 5](#5-la-contraseña-de-los-cv-no-públicos) |
 | `www.krahegwen.com` | ⚠️ no existe — opcional, ver abajo |
 
@@ -114,10 +114,18 @@ Quedó registrado para la próxima vez: no hubo que elegir gris ni naranja ni
 copiar ninguna IP. Cloudflare creó el registro y emitió el certificado por su
 cuenta, que es lo que se gana teniéndolo todo en el mismo sitio.
 
-## 4. Analítica
+## 4. Analítica — hecha
 
 Dashboard → Analytics & Logs → **Web Analytics** → Add a site → `krahegwen.com`.
-Copia el token.
+El token está en **Manage site → Opciones avanzadas**, dentro del snippet.
+
+> **«Activar» en ese panel no hace nada aquí.** La opción por defecto promete
+> inyectar el script sola, y con un origen normal lo hace: el proxy le mete el
+> beacon a la respuesta al pasar. Este sitio no tiene origen — el HTML lo sirve
+> Workers Static Assets, que no pasa por ese punto—, así que la inyección
+> automática se queda en la promesa. Comprobado sobre el dominio: con «Activar»
+> puesto, la portada no traía beacon. La opción que describe la realidad es
+> **«Habilitar con la instalación del snippet JS»**, porque lo instala la web.
 
 > **Va en el build, no en el Worker.** Es la trampa de este montaje: las páginas
 > están prerenderizadas y Cloudflare las sirve como ficheros estáticos, sin
