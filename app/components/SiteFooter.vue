@@ -24,7 +24,7 @@ const year = new Date().getFullYear()
 
     <div class="shell ftr__base mono">
       <span>© {{ year }} {{ identity.name }}</span>
-      <span>{{ t({ es: 'Nuxt 4 · GSAP · Vercel · sin cookies', en: 'Nuxt 4 · GSAP · Vercel · no cookies' }) }}</span>
+      <span>{{ t({ es: 'Nuxt 4 · GSAP · Cloudflare Workers · sin cookies', en: 'Nuxt 4 · GSAP · Cloudflare Workers · no cookies' }) }}</span>
     </div>
   </footer>
 </template>
