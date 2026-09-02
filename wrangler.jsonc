@@ -64,12 +64,15 @@
    * Los avisos salen por Telegram. El envío de correo desde un Worker exige
    * plan Workers Paid, y esto es una web personal.
    *
-   * `TELEGRAM_TOKEN` y `CV_CLAVE` **no están aquí**: son secretos y van por
-   * `wrangler secret put`. Este fichero se versiona.
+   * Los dos valores del canal **no están aquí**. `TELEGRAM_TOKEN` porque es un
+   * secreto de manual. Y `TELEGRAM_CHAT_ID` porque, aunque sin el token no
+   * sirva para enviar nada, es un identificador personal de Telegram y este
+   * fichero se versiona en un repositorio público: en `vars` quedaría escrito
+   * para siempre en el historial. Va por `wrangler secret put`, igual que el
+   * token y que `CV_CLAVE`. El Worker recibe secretos y variables en el mismo
+   * `env`, así que a `server/utils/notificar.ts` le da igual por dónde lleguen.
    */
   "vars": {
-    // El id del chat no es un secreto: sin el token no sirve de nada.
-    "TELEGRAM_CHAT_ID": "",
     // `no` silencia los avisos de descarga sin tocar código ni redesplegar.
     "AVISAR_DESCARGAS": "si"
   },

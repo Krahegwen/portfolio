@@ -6,9 +6,9 @@
 |---|---|
 | Despliegue en Cloudflare Workers | ✅ hecho |
 | Dominio `krahegwen.com` | ✅ hecho |
-| Avisos del formulario | ⏳ falta el bot de Telegram — [paso 2](#2-avisos-por-telegram) |
+| Avisos del formulario | ✅ hecho — bot `@krahegwen_warnings_bot`, [paso 2](#2-avisos-por-telegram--hecho) |
 | Analítica | ⏳ falta el token, **y va en el build** — [paso 4](#4-analítica) |
-| CV anónimo e interno | ⏳ falta la contraseña — [paso 5](#5-la-contraseña-de-los-cv-no-públicos) |
+| CV anónimo e interno | ✅ hecho — `CV_CLAVE` puesta, [paso 5](#5-la-contraseña-de-los-cv-no-públicos) |
 | `www.krahegwen.com` | ⚠️ no existe — opcional, ver abajo |
 
 Medido sobre el dominio real: TTFB 80-95 ms y 205 KB en la primera carga,
@@ -41,11 +41,15 @@ Workers → `krahegwen` → Settings → Domains & Routes → Add → Custom Dom
 `www.krahegwen.com`. Servirá el mismo sitio, y los `canonical` ya le dicen a
 Google cuál es la buena.
 
-## 2. Avisos por Telegram
+## 2. Avisos por Telegram — hecho
 
-Es lo único que no funciona hasta que lo configures. Mientras tanto el formulario
-devuelve un 503 honesto y enseña tu dirección de correo, en lugar de tragarse el
-mensaje diciendo que ha llegado.
+Funcionando: el formulario de contacto y las descargas de CV avisan a
+`@krahegwen_warnings_bot`. Si algún día el aviso no sale, el formulario devuelve
+un 503 honesto y enseña tu dirección de correo, en lugar de tragarse el mensaje
+diciendo que ha llegado.
+
+Queda escrito por si hay que rehacerlo —bot nuevo, cuenta nueva, o el mismo
+montaje en otro sitio—.
 
 > **Por qué Telegram y no correo.** Enviar correo desde un Worker exige plan
 > Workers Paid (5 $/mes) — lo dice el propio dashboard en Email Sending. Para una
@@ -60,14 +64,30 @@ mensaje diciendo que ha llegado.
 curl -s "https://api.telegram.org/bot<TU_TOKEN>/getUpdates" | grep -o '"chat":{"id":[-0-9]*'
 ```
 
-4. El id no es secreto: va en `vars` de `wrangler.jsonc`, en `TELEGRAM_CHAT_ID`.
-   El token **sí** lo es:
+4. Los dos van como secreto, y ninguno a `wrangler.jsonc`:
 
 ```bash
 npx wrangler secret put TELEGRAM_TOKEN
+npx wrangler secret put TELEGRAM_CHAT_ID
 ```
 
-5. `pnpm run deploy` y prueba el formulario en la web.
+   El token, por lo evidente. El id **no es secreto en el sentido de seguridad**
+   —sin el token no sirve para enviar nada—, pero este repositorio es público y
+   `wrangler.jsonc` se versiona: en `vars` quedaría escrito para siempre en el
+   historial de git, y es un identificador personal de Telegram. Al Worker le
+   llega igual: secretos y variables aterrizan en el mismo `env`.
+
+5. `pnpm build && pnpm run deploy`, y prueba el formulario en la web. Sin navegador:
+
+```bash
+ABIERTO=$(( $(date +%s)000 - 10000 ))
+curl -s -X POST https://krahegwen.com/api/contacto \
+  -H 'content-type: application/json' \
+  -d "{\"nombre\":\"Prueba\",\"email\":\"tu@correo.com\",\"mensaje\":\"Aviso de prueba del canal.\",\"consentimiento\":true,\"idioma\":\"es\",\"abierto\":$ABIERTO}"
+```
+
+   Un `{"ok":true}` significa que Telegram aceptó el envío; el `abierto` va diez
+   segundos atrás porque el formulario rechaza los rellenos de menos de tres.
 
 ### Detalles que ya están resueltos
 

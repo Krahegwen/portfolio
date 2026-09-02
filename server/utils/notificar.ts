@@ -89,7 +89,7 @@ export async function notificar(event: H3Event, aviso: Aviso) {
   const { token, chat } = config(event)
 
   if (!token) throw new SinTransporte('falta el secreto TELEGRAM_TOKEN')
-  if (!chat) throw new SinTransporte('falta la variable TELEGRAM_CHAT_ID')
+  if (!chat) throw new SinTransporte('falta el secreto TELEGRAM_CHAT_ID')
 
   const plano = [
     aviso.titulo,
