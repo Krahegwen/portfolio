@@ -28,7 +28,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Not Found' })
   }
 
-  const pdf = await useStorage('assets:server').getItemRaw<Uint8Array>(`cv/${archivo}`)
+  /*
+   * El parámetro de `Uint8Array` no es adorno. Desde TypeScript 5.7 el tipo
+   * lleva genérico, y `Uint8Array<ArrayBufferLike>` —lo que se deduce sin
+   * decir nada— incluye la posibilidad de estar respaldado por un
+   * `SharedArrayBuffer`, que no vale como cuerpo de `Response`. El almacén de
+   * activos de Nitro nunca devuelve eso. `getItemRaw` no comprueba nada en
+   * ejecución, así que el genérico es solo decir en voz alta lo que ya se sabe.
+   */
+  const pdf = await useStorage('assets:server')
+    .getItemRaw<Uint8Array<ArrayBuffer>>(`cv/${archivo}`)
 
   if (!pdf) {
     console.error(`[cv] falta el PDF privado ${archivo} en server/assets/cv/`)
