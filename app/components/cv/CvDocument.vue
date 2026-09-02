@@ -29,6 +29,14 @@ const isInternal = computed(() => props.variant === 'accenture')
 
 const email = computed(() => (isInternal.value ? identity.emailInternal : identity.email))
 
+/*
+ * El dominio se escribe una sola vez, en `identity.site`, y de ahí sale también
+ * lo que se lee en el PDF. Estuvo escrito a mano en dos sitios, y eso convierte
+ * un cambio de dominio —que algún día será portilla.dev— en un PDF que enlaza a
+ * un sitio y dice el nombre de otro.
+ */
+const dominio = identity.site.replace('https://', '')
+
 const role = computed(() => (isInternal.value ? identity.titleInternal : identity.title))
 
 const totalYears = computed(() => yearsSince(identity.careerStart))
@@ -84,7 +92,7 @@ const yearsGrid = computed(() => [
         </li>
         <li v-if="!isInternal"><a :href="identity.github">github.com/{{ identity.handle }}</a></li>
         <li v-if="!isInternal"><a :href="identity.linkedin">linkedin.com/in/diego-portilla-tejería</a></li>
-        <li v-if="!isInternal"><a :href="identity.site">krahegwen.com</a></li>
+        <li v-if="!isInternal"><a :href="identity.site">{{ dominio }}</a></li>
       </ul>
       <ul v-else class="cv__contact mono">
         <li>{{ t({ es: 'Cantabria, España — remoto', en: 'Northern Spain — remote' }) }}</li>
@@ -254,7 +262,7 @@ const yearsGrid = computed(() => [
     </div>
 
     <footer class="cv__foot mono">
-      <span>{{ t({ es: 'Generado desde', en: 'Generated from' }) }} krahegwen.com</span>
+      <span>{{ t({ es: 'Generado desde', en: 'Generated from' }) }} {{ dominio }}</span>
       <span>{{ new Date().toISOString().slice(0, 10) }}</span>
     </footer>
   </article>
