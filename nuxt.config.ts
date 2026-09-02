@@ -6,20 +6,6 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/fonts.css', '~/assets/css/tokens.css', '~/assets/css/base.css'],
 
-  runtimeConfig: {
-    public: {
-      /*
-       * Token de Cloudflare Web Analytics. Sin él no se inyecta el script, así
-       * que en local y en cualquier despliegue sin la variable no se mide nada.
-       *
-       * Es analítica sin cookies y sin identificador persistente, que es la
-       * razón por la que esta web no lleva muro de consentimiento. Ver
-       * /privacidad, y los tests que lo vigilan.
-       */
-      analyticsToken: '',
-    },
-  },
-
   // Casi todo es contenido fijo y se prerrenderiza en el build, y Cloudflare lo
   // sirve como activo estático sin invocar el Worker. Las únicas dos rutas que
   // ejecutan algo son las de `server/api/`: el formulario y el aviso de descarga.
@@ -73,6 +59,36 @@ export default defineNuxtConfig({
          */
         { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/instrument-serif-400-latin.woff2', crossorigin: '' },
         { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/space-grotesk-400-latin.woff2', crossorigin: '' },
+      ],
+      /*
+       * Cloudflare Web Analytics.
+       *
+       * Va en la cabecera base y no en un `useHead` de `app.vue`, y el motivo
+       * es `404.html`: Nuxt la prerenderiza como cáscara de cliente
+       * (`data-ssr="false"`), así que lo que declara un componente no llega a
+       * su HTML. Con el beacon en `app.vue` salía en 28 de las 29 páginas, y la
+       * que faltaba era justo la que ve quien llega de un enlace roto. Desde
+       * aquí entra en las 29.
+       *
+       * Se lee de `process.env` **al compilar**, que es cuando de verdad se
+       * decide: las páginas son ficheros estáticos que Cloudflare sirve sin
+       * invocar al Worker, así que una variable de ejecución no las tocaría.
+       * La variable conserva el prefijo `NUXT_PUBLIC_` por costumbre y porque
+       * así está escrita en el `.env` y en DESPLIEGUE.md, aunque ya no pase por
+       * `runtimeConfig`. Sin token no se inyecta nada y en local no se mide.
+       *
+       * No pone cookies ni identificador persistente, que es la razón por la
+       * que esta web no lleva muro de consentimiento. Ver /privacidad y los
+       * tests que lo vigilan.
+       */
+      script: [
+        ...(process.env.NUXT_PUBLIC_ANALYTICS_TOKEN
+          ? [{
+              src: 'https://static.cloudflareinsights.com/beacon.min.js',
+              'defer': true,
+              'data-cf-beacon': JSON.stringify({ token: process.env.NUXT_PUBLIC_ANALYTICS_TOKEN }),
+            }]
+          : []),
       ],
     },
   },
