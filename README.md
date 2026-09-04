@@ -200,6 +200,18 @@ La textura de fondo de las tarjetas (`scripts/og-texture.png`) la generó ComfyU
 en local con z-image-turbo. El texto va encima, vectorial: un modelo de imagen no
 sabe escribir un nombre y una tarjeta social se lee, sobre todo, por el nombre.
 
+Las etiquetas que leen las plataformas —lo que Discord o WhatsApp sacan del
+HTML— viven en dos sitios, y no por gusto:
+
+- `app.vue` pone el juego completo con el idioma y la canónica de cada ruta. Es
+  el respaldo de toda la web: las páginas que tienen algo mejor que decir
+  sobrescriben `og:title` y `og:description` por clave, y las que no —las hojas
+  de impresión— se quedan con el texto del sitio.
+- `nuxt.config.ts` repite una versión estática en castellano, por el mismo
+  motivo que el beacon de analítica: `404.html` se prerenderiza como cáscara de
+  cliente y no recoge lo que declara un componente. Sin eso, el enlace roto
+  —justo el que más falta hace explicar— salía como una caja gris.
+
 ### Tests
 
 Viven en local y **no están en el repo** (`tests/` y `vitest.config.ts` están en
