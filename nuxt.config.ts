@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { identity, tagline } from './content/profile'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-08-01',
   devtools: { enabled: true },
@@ -49,6 +51,30 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'theme-color', content: '#0a0b0d' },
+        /*
+         * Tarjeta de enlace por defecto, aquí por el mismo motivo que el beacon
+         * de más abajo: `404.html` se prerenderiza como cáscara de cliente
+         * (`data-ssr="false"`) y no recoge lo que declara un componente. Con la
+         * tarjeta solo en `app.vue`, un enlace roto pegado en un chat salía como
+         * una caja gris sin texto ni imagen — y es justo el enlace que más falta
+         * hace explicar.
+         *
+         * En castellano y sin `og:url`: es lo único que se puede decidir al
+         * compilar, y en un 404 la URL buena es la que pegó quien comparte.
+         * `app.vue` sobrescribe por clave en cada página de verdad, con el
+         * idioma y la canónica que toquen.
+         */
+        { property: 'og:title', content: `${identity.name} — ${identity.title.es}` },
+        { property: 'og:description', content: tagline.es },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: identity.name },
+        { property: 'og:image', content: `${identity.site}/og.png` },
+        { property: 'og:image:type', content: 'image/png' },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        { property: 'og:image:alt', content: `${identity.name} — ${identity.title.es}` },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:image', content: `${identity.site}/og.png` },
       ],
       link: [
         { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
