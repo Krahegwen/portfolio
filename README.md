@@ -8,9 +8,9 @@ Cloudflare Workers: sin CMS, sin base de datos y con un solo proveedor.
 
 ## La idea
 
-Había seis CV en una carpeta —dos `.docx`, dos `.pdf`, tres `.pptx`, de 2022 y
-2023— con fechas distintas y verdades ligeramente distintas. Uno decía "+5 años
-de experiencia" tres años después de que dejara de ser cierto.
+Había seis CV en una carpeta —nueve ficheros: tres `.docx`, tres `.pdf` y tres
+`.pptx`, de 2022 y 2023— con fechas distintas y verdades ligeramente distintas.
+Uno decía "+5 años de experiencia" tres años después de que dejara de ser cierto.
 
 Aquí hay **una sola fuente de datos**, [`content/profile.ts`](content/profile.ts),
 y tres formas de leerla según quién esté al otro lado. Lo que cambiaba entre
@@ -143,7 +143,7 @@ consentimiento porque es estrictamente necesaria para algo que se solicita
 tecleando una contraseña. Los tests ya no vigilan que no haya cookies, sino que
 no aparezca una **segunda**.
 
-Las tipografías **están autoalojadas** (`public/fonts/`, 392 KB). Cargarlas desde
+Las tipografías **están autoalojadas** (`public/fonts/`, 351 KiB en 18 ficheros). Cargarlas desde
 Google Fonts, que es lo normal, habría enviado la IP de cada visitante a Google
 en cada carga; ahora también ahorra dos handshakes en la ruta crítica.
 
@@ -219,7 +219,7 @@ Viven en local y **no están en el repo** (`tests/` y `vitest.config.ts` están 
 `devDependencies` sí están versionadas, así que `pnpm test` funcionará sin tocar
 nada más.
 
-Son 100 y cubren cinco cosas: la aritmética de fechas, la coherencia del
+Son 104 y cubren cinco cosas: la aritmética de fechas, la coherencia del
 contenido (fechas sin huecos ni solapes, slugs únicos, traducciones sin
 olvidos), la paridad de los dos árboles de rutas, y las dos que de verdad
 importan — que los nombres de cliente no se escapen de la variante interna, y
@@ -232,7 +232,7 @@ que tiene que llegar al Worker.
 
 ## Despliegue
 
-**Cloudflare Workers** (preset `cloudflare_module`). Las 27 páginas se
+**Cloudflare Workers** (preset `cloudflare_module`). Las 29 páginas se
 prerrenderizan y las sirve Static Assets sin invocar el Worker. Al Worker solo
 llegan `/api/*`, la descarga de los CV privados y las cuatro hojas de impresión
 que no son públicas — y llegan porque `run_worker_first` las nombra en

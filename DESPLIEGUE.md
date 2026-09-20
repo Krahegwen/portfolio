@@ -264,12 +264,26 @@ cada petición.
 
 ### Qué queda fuera del candado
 
-La página se pinta en el navegador, así que **los datos del CV —incluidos los
-nombres de cliente— siguen viajando en el bundle de JavaScript**, igual que antes
-de todo esto. El candado cierra los PDF y las hojas de impresión; no convierte en
-secreto un dato que ya estaba publicado. Para eso habría que sacar esos campos de
-`content/profile.ts` a un módulo que solo importe el servidor y servirlos por
-API tras la cookie — más trabajo, y un cambio de arquitectura, no un parche.
+La página se pinta en el navegador, así que **los datos del CV siguen viajando en
+el bundle de JavaScript**, igual que antes de todo esto. El candado cierra los PDF
+y las hojas de impresión; no convierte en secreto un dato que ya estaba publicado.
+
+**Y no es solo lo de los nombres de cliente.** El módulo del perfil viaja entero,
+así que en un fichero público de `/_nuxt/` van también **el teléfono** y **el
+correo corporativo**. Comprobado sobre el dominio: ese fichero responde 200 sin
+cookie ninguna. Además el repositorio es público, así que `content/profile.ts` los
+enseña en claro en GitHub, y el historial de git ya los tiene aunque algún día se
+quiten.
+
+Lo importante es no confundirse con `identity.publishPhone`: esa bandera decide si
+el número **se imprime** en el PDF público, no si está publicado. Está a `false`
+por una razón distinta —que un PDF indexable lo recogen los rastreadores y no se
+retira de las cachés— y esa razón sigue en pie.
+
+Para cerrarlo de verdad habría que sacar esos campos de `content/profile.ts` a un
+módulo que solo importe el servidor y servirlos por API tras la cookie — más
+trabajo, y un cambio de arquitectura, no un parche. Sigue sin hacerse a
+propósito (Diego, 2026-09-20).
 
 ## Después
 

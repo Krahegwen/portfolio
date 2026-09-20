@@ -65,6 +65,12 @@ export const identity = {
    * Ponlo a `true` si prefieres que aparezca; el resto del montaje ya lo
    * respeta y solo afecta al PDF `recruiter` (ni el anónimo ni el interno lo
    * pintan nunca, pase lo que pase con esta bandera).
+   *
+   * **Ojo con lo que esta bandera NO hace.** Decide si el número se imprime en
+   * el PDF público, no si está publicado: este módulo viaja entero al bundle del
+   * navegador, así que el teléfono —y el correo corporativo, y los nombres de
+   * cliente— se descargan hoy de un fichero público de `/_nuxt/`. Y el
+   * repositorio es público. Ver DESPLIEGUE.md § Qué queda fuera del candado.
    */
   publishPhone: false,
   github: 'https://github.com/Krahegwen',
