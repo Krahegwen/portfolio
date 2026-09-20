@@ -39,13 +39,13 @@ onMounted(() => {
       </p>
 
       <h2 data-reveal class="ct__title serif">
-        {{ t({ es: '¿Hablamos de lo que hay que construir?', en: 'Shall we talk about what needs building?' }) }}
+        {{ t({ es: 'Escríbeme', en: 'Get in touch' }) }}
       </h2>
 
       <p data-reveal class="ct__lede">
         {{ t({
-          es: 'Escribo desde Cantabria y trabajo en remoto. Si tienes un producto con 3D en el navegador, un front que se ha vuelto inmanejable o simplemente curiosidad por alguno de mis proyectos, el correo está abierto.',
-          en: 'I write from northern Spain and work remotely. If you have a product with 3D in the browser, a front end that has become unmanageable, or just curiosity about one of my projects, the inbox is open.',
+          es: 'Escribo desde Cantabria y trabajo en remoto. Si quieres comentarme algo sobre alguno de mis proyectos, o simplemente saludar, el correo está abierto.',
+          en: 'I write from northern Spain and work remotely. If you want to ask me something about one of my projects, or simply say hello, the inbox is open.',
         }) }}
       </p>
 

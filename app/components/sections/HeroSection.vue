@@ -51,7 +51,7 @@ onMounted(() => {
 
     <div class="shell hero__copy">
       <p class="eyebrow hero__eyebrow">
-        {{ t(identity.location) }} · {{ t({ es: 'disponible para hablar', en: 'open to conversations' }) }}
+        {{ t(identity.location) }}
       </p>
 
       <h1 class="hero__name">
