@@ -102,8 +102,8 @@ export const projects: Project[] = [
     ],
     stack: ['Python', 'FastAPI', 'rawpy', 'SQLite', 'Vue 3', 'Vite', 'MCP'],
     metrics: [
-      { label: { es: 'tools MCP', en: 'MCP tools' }, value: '15' },
-      { label: { es: 'endpoints', en: 'endpoints' }, value: '19' },
+      { label: { es: 'tools MCP', en: 'MCP tools' }, value: '20' },
+      { label: { es: 'endpoints', en: 'endpoints' }, value: '28' },
       { label: { es: 'RAW modificados', en: 'RAWs modified' }, value: '0' },
     ],
     repo: 'https://github.com/Krahegwen/photo-editor',
