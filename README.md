@@ -143,7 +143,7 @@ consentimiento porque es estrictamente necesaria para algo que se solicita
 tecleando una contraseña. Los tests ya no vigilan que no haya cookies, sino que
 no aparezca una **segunda**.
 
-Las tipografías **están autoalojadas** (`public/fonts/`, 392 KB). Cargarlas desde
+Las tipografías **están autoalojadas** (`public/fonts/`, 351 KiB en 18 ficheros). Cargarlas desde
 Google Fonts, que es lo normal, habría enviado la IP de cada visitante a Google
 en cada carga; ahora también ahorra dos handshakes en la ruta crítica.
 
