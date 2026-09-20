@@ -8,9 +8,9 @@ Cloudflare Workers: sin CMS, sin base de datos y con un solo proveedor.
 
 ## La idea
 
-Había seis CV en una carpeta —dos `.docx`, dos `.pdf`, tres `.pptx`, de 2022 y
-2023— con fechas distintas y verdades ligeramente distintas. Uno decía "+5 años
-de experiencia" tres años después de que dejara de ser cierto.
+Había seis CV en una carpeta —nueve ficheros: tres `.docx`, tres `.pdf` y tres
+`.pptx`, de 2022 y 2023— con fechas distintas y verdades ligeramente distintas.
+Uno decía "+5 años de experiencia" tres años después de que dejara de ser cierto.
 
 Aquí hay **una sola fuente de datos**, [`content/profile.ts`](content/profile.ts),
 y tres formas de leerla según quién esté al otro lado. Lo que cambiaba entre
