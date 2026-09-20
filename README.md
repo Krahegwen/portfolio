@@ -219,7 +219,7 @@ Viven en local y **no están en el repo** (`tests/` y `vitest.config.ts` están 
 `devDependencies` sí están versionadas, así que `pnpm test` funcionará sin tocar
 nada más.
 
-Son 100 y cubren cinco cosas: la aritmética de fechas, la coherencia del
+Son 104 y cubren cinco cosas: la aritmética de fechas, la coherencia del
 contenido (fechas sin huecos ni solapes, slugs únicos, traducciones sin
 olvidos), la paridad de los dos árboles de rutas, y las dos que de verdad
 importan — que los nombres de cliente no se escapen de la variante interna, y
