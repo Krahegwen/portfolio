@@ -146,8 +146,9 @@ que curiosear las seis versiones no genere seis mensajes. Si aun así sobra:
 
 ## 3. El dominio — hecho
 
-`krahegwen.com` sirve el sitio con certificado válido, y `brew`, `life` y
-`watch-store` siguen apuntando a sus propios Workers, intactos.
+`krahegwen.com` sirve el sitio con certificado válido, y el resto de la zona
+sigue intacta: `brew` y `life` en sus propios Workers, y `watch-store` —que no
+es un Worker, sino un CNAME a Vercel— donde estaba.
 
 Quedó registrado para la próxima vez: no hubo que elegir gris ni naranja ni
 copiar ninguna IP. Cloudflare creó el registro y emitió el certificado por su
