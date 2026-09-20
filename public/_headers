@@ -1,4 +1,4 @@
-# Cabeceras de los activos estáticos, que aquí son las 27 páginas del sitio
+# Cabeceras de los activos estáticos, que aquí son las 29 páginas del sitio
 # además de las tipografías, los PDF y las imágenes. Las respuestas que genera el
 # Worker (/api/*) no pasan por aquí: devuelven JSON y no necesitan CSP.
 #

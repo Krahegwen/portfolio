@@ -232,7 +232,7 @@ que tiene que llegar al Worker.
 
 ## Despliegue
 
-**Cloudflare Workers** (preset `cloudflare_module`). Las 27 páginas se
+**Cloudflare Workers** (preset `cloudflare_module`). Las 29 páginas se
 prerrenderizan y las sirve Static Assets sin invocar el Worker. Al Worker solo
 llegan `/api/*`, la descarga de los CV privados y las cuatro hojas de impresión
 que no son públicas — y llegan porque `run_worker_first` las nombra en

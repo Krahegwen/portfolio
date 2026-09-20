@@ -9,7 +9,7 @@
   "compatibility_flags": ["nodejs_compat"],
 
   /*
-   * Las 27 páginas prerrenderizadas, los PDF públicos, las tipografías y las
+   * Las 29 páginas prerrenderizadas, los PDF públicos, las tipografías y las
    * tarjetas sociales se sirven como activos estáticos, sin invocar el Worker.
    * Llegan a él `/api/*`, la descarga de los CV privados y sus hojas de
    * impresión.
