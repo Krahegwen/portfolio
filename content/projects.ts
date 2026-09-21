@@ -174,7 +174,7 @@ export const projects: Project[] = [
       { label: { es: 'jugadores', en: 'players' }, value: '2–6' },
       { label: { es: 'temas', en: 'themes' }, value: '3' },
     ],
-    demo: 'https://life.krahegwen.com',
+    demo: 'https://tcg.krahegwen.com',
   },
   {
     slug: 'tws-tools',
