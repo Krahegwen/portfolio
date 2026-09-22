@@ -321,6 +321,12 @@ propósito (Diego, 2026-09-20).
 - **Si algún día pasas a Workers Paid** y prefieres correo, el cambio es
   reescribir `enviar()` en `server/utils/notificar.ts` y actualizar el bloque de
   terceros de `content/privacidad.ts`. Nada más sabe por dónde salen los avisos.
+  Pero antes de mandar el primer correo, lee lo de abajo: el DMARC de la zona
+  está en `p=reject` y lo que no pase no se entrega.
+- **El correo de la zona — declarado el 2026-09-22.** `krahegwen.com` publica SPF
+  y DMARC, y no son los de un dominio que no envía: la zona **sí** manda correo,
+  aunque no lo mande este sitio.
+  [Ver abajo](#el-correo-de-la-zona-no-es-de-este-proyecto).
 
 ### Si empieza a entrar spam
 
@@ -330,6 +336,48 @@ estás en Cloudflare, el widget es gratuito y solo hay que verificar el token en
 `server/api/contacto.post.ts`, junto a las otras comprobaciones. No lo he montado
 de entrada porque poner un muro delante de cada persona que quiere escribir
 cuesta más que el spam que hoy no existe.
+
+### El correo de la zona no es de este proyecto
+
+Este sitio no envía correo: el formulario avisa por Telegram y la dirección de
+contacto es personal y de otro proveedor. **La zona sí envía**, y eso es lo que
+hay que saber antes de tocar un registro de correo de `krahegwen.com`.
+
+Otro proyecto que vive en esta misma zona tiene el dominio verificado en Resend y
+manda correo transaccional —confirmaciones, facturas, resets— **con remitente
+`@krahegwen.com`**, el ápice. De ahí salen cuatro registros que no son de este
+repo:
+
+| Nombre | Registro | Para qué |
+|---|---|---|
+| ápice | `v=spf1 include:amazonses.com ~all` | autoriza a SES a enviar como `@krahegwen.com` |
+| `_dmarc` | `v=DMARC1; p=reject;` | rebota lo que no pase; **cubre también los subdominios** |
+| `resend._domainkey` | la clave DKIM | firma esos envíos como `d=krahegwen.com` |
+| `send` | SPF de SES y MX a `feedback-smtp…` | el Return-Path de esos mismos envíos |
+
+Los dos primeros se pusieron el **2026-09-22**, para que nadie pueda mandar correo
+haciéndose pasar por el dominio. Los dos últimos ya estaban, del alta en Resend.
+
+> **El SPF del ápice nació mal y se corrigió el mismo día.** Salió como
+> `v=spf1 -all` —«de aquí no envía nadie»— porque este repo no envía correo y la
+> zona no tiene MX en el ápice. Pero el remitente de esos envíos **es** el ápice,
+> así que el dominio se estaba desmintiendo a sí mismo. No llegó a tumbar nada
+> porque el SPF se evalúa contra el Return-Path, que es `send`, pero un filtro que
+> mire el `From` habría mandado las facturas a spam.
+
+**La trampa, que es la razón de esta sección.** El DMARC del ápice **se hereda**:
+se aplica a `@krahegwen.com` y a cualquier subdominio que no tenga el suyo. Si
+algún día este sitio envía correo, no basta con que el envío funcione: tiene que
+**pasar DMARC o no se entrega**, y el fallo es silencioso y del lado del que
+recibe. Hacen falta las dos cosas: que el remitente esté autorizado en el SPF del
+ápice —o que envíe desde un subdominio con SPF propio— y que vaya firmado con
+DKIM alineado.
+
+Hoy pasa por las dos vías porque la alineación es **relajada**: no hay `aspf=s`
+ni `adkim=s`, y por eso `send.krahegwen.com` alinea con el ápice. **Poner esa `s`
+rompería el correo del otro proyecto sin avisar.** Y el DMARC no lleva `rua=` a
+propósito: los informes se piden con una dirección de correo, y eso es publicarla
+en un registro que consulta cualquiera.
 
 ## Cuando cambie el CV
 
