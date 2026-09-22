@@ -10,6 +10,7 @@
 | Analítica | ✅ hecha — el token se hornea en el build, [paso 4](#4-analítica--hecha) |
 | CV anónimo e interno | ✅ hecho — `CV_CLAVE` puesta, [paso 5](#5-la-contraseña-de-los-cv-no-públicos) |
 | `www.krahegwen.com` | ✅ hecho — mismo sitio, canonical al ápice |
+| Google Search Console | ✅ hecho — propiedad de Dominio y sitemap enviado, [después](#después) |
 | `portilla.dev` | 🕓 cuando sea tuyo — [ver abajo](#el-día-que-llegue-portilladev) |
 
 Medido sobre el dominio real: TTFB 80-95 ms y 205 KB en la primera carga,
@@ -63,22 +64,29 @@ Esa lista es **la lista completa**: lo que no esté ahí, wrangler no lo crea. E
 ### El día que llegue portilla.dev
 
 El plan es que la web pase a `portilla.dev` **manteniendo los dos dominios**. El
-montaje ya está preparado para eso, y son tres pasos:
+montaje ya está preparado para eso, y son cinco pasos:
 
-1. **`content/profile.ts` → `identity.site`.** Es el único sitio donde está
+1. **La zona, a la misma cuenta de Cloudflare.** Añadir el dominio y esperar a
+   que quede activa: sin eso, la `route` del paso 3 no tiene dónde engancharse.
+2. **`content/profile.ts` → `identity.site`.** Es el único sitio donde está
    escrito el dominio. De ahí salen los `canonical`, los `hreflang`, el sitemap,
    las tarjetas sociales, el JSON-LD y hasta el pie de los seis PDF del CV.
    Cambiar esa línea traslada la dirección buena; los tres dominios seguirán
    sirviendo el sitio y los tres dirán que la versión canónica es la nueva, que
    es exactamente la señal que Google necesita para mover el índice sin perderlo.
-2. **`routes` en `wrangler.jsonc`**, una línea más. Sin quitar las de
+3. **`routes` en `wrangler.jsonc`**, una línea más. Sin quitar las de
    `krahegwen.com`: la gracia es que las direcciones viejas sigan funcionando.
-3. **`pnpm build && pnpm cv:pdf && pnpm og && pnpm run deploy`.** Los PDF y las
+4. **`pnpm build && pnpm cv:pdf && pnpm og && pnpm run deploy`.** Los PDF y las
    tarjetas llevan el dominio dibujado dentro, así que hay que regenerarlos.
+5. **Search Console y LinkedIn, otra vez.** Propiedad de Dominio nueva para
+   `portilla.dev` con su sitemap, **dejando viva la de `krahegwen.com`** y **sin**
+   usar «Cambio de dirección», que es para retirar el dominio viejo y aquí los dos
+   se quedan: el `canonical` del paso 2 es toda la señal que Google necesita. Y
+   pasar el Post Inspector con la URL nueva, que para LinkedIn empieza de cero.
 
 Lo que **no** hay que tocar: nada del código. Si alguna vez aparece un
 `krahegwen.com` escrito a mano fuera de `content/`, es un bug —ya pasó en el pie
-de los CV— y el sitio es esa línea 1, no un buscar y reemplazar.
+de los CV— y el sitio es esa línea del paso 2, no un buscar y reemplazar.
 
 ## 2. Avisos por Telegram — hecho
 
@@ -288,12 +296,25 @@ propósito (Diego, 2026-09-20).
 
 ## Después
 
-- **Google Search Console**: añadir la propiedad y enviar
-  `https://krahegwen.com/sitemap.xml`. El sitemap declara `hreflang` recíproco
-  entre `/` y `/en`.
-- **LinkedIn**: al pegar el enlace saldrá la tarjeta de `public/og.png`. Si
-  cambia y sigue enseñando la vieja, su
-  [Post Inspector](https://www.linkedin.com/post-inspector/) fuerza el refresco.
+- **Google Search Console — hecho el 2026-09-22.** Propiedad de tipo **Dominio**
+  (`krahegwen.com`, sin prefijo), que cubre el ápice, `www`, http y https y
+  cualquier subdominio que venga después; verificada con un TXT en el ápice desde
+  el panel de Cloudflare. **El repo no se tocó y no hay que tocarlo**: no existe
+  fichero de verificación en `public/`, y no debe existir. El sitemap se envió y
+  Google lo leyó el mismo día —*Success*, **22 páginas descubiertas**, que son
+  exactamente las 22 del XML, con `hreflang` recíproco entre `/` y `/en`—. Lo que
+  queda no es una tarea: esperar a que salgan en Páginas → Indexadas, de días a
+  dos semanas. Avisará de `/api/`, `/print/` y `/en/print/` como excluidas por
+  `robots.txt`; es lo correcto y no se arregla.
+- **LinkedIn — comprobado el 2026-09-22**, y tampoco es ya una tarea. Al pegar el
+  enlace, LinkedIn lee las etiquetas él solo: el sitio es HTML prerrenderizado y
+  las `og:` van en el primer byte, sin JavaScript de por medio. Su
+  [Post Inspector](https://www.linkedin.com/post-inspector/) no es un requisito,
+  es un desatascador de caché, y solo hace falta si has regenerado la tarjeta y
+  sigue saliendo la vieja —su caché dura ~7 días—. **La tarjeta se congela en el
+  post al publicar**, así que el refresco va antes de publicar y nunca después. Y
+  cada URL tiene su propia caché: `/` y `/en` son tarjetas distintas a propósito
+  (`og.png` y `og-en.png`), y `www` cuenta como enlace aparte.
 - **El teléfono**: hoy no sale en ningún PDF, a propósito. Si lo quieres en el
   público, `identity.publishPhone: true` en `content/profile.ts` y
   `pnpm build && pnpm cv:pdf`.
